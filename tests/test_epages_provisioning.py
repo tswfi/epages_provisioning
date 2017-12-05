@@ -23,9 +23,14 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     For example:
 
-        EP_ENDPOINT=http://tatu05.sml18.vilkas.pri/epages/Site.soap EP_PROVIDER=Distributor EP_USERNAME=admin EP_PASSWORD=admin make test
+        export EP_ENDPOINT=http://tatu05.sml18.vilkas.pri/epages/Site.soap
+        export EP_PROVIDER=Distributor
+        export EP_USERNAME=admin
+        export EP_PASSWORD=admin
+        make test
 
-    These tests also assume that the ePages service is a default installation with default shoptypes etc.
+    These tests also assume that the ePages service is a default installation
+    with default shoptypes etc.
     """
 
     @classmethod
@@ -46,9 +51,10 @@ class TestSimpleProvisioning(unittest.TestCase):
             'Alias': 'test-{}'.format(self._nowstr),
             'ShopType': 'MinDemo',
         }
-        shopinfo = self._sp.create(data)
+        self._sp.create(data)
 
     def test_001_delete(self):
+        """ test shop deletion, assumes that create was successfull """
         data = {
             'Alias': 'test-{}'.format(self._nowstr),
         }

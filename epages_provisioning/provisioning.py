@@ -24,6 +24,7 @@ class BaseProvisioningService(object):
     def __init__(self, endpoint="", provider="", username="", password=""):
         super().__init__()
         self.endpoint = endpoint
+        self.provider = provider
         self.username = username
         self.password = password
 
@@ -33,20 +34,22 @@ class SimpleProvisioningService(BaseProvisioningService):
     Simple provisioning, handles creating updating and deleting shops in ePages
     environment.
     """
-    def __init__(self, endpoint="", provider="", username="", password="", wsdl=""):
+    def __init__(self, endpoint="", provider="", username="", password=""):
         super().__init__(
             endpoint=endpoint,
             provider=provider,
             username=username,
             password=password
             )
+
         # build url for the wsdl from the endpoint information
         parsed = urlparse(endpoint)
         wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/SimpleProvisioningService6.wsdl'.format(uri=parsed)
         logger.info('Built wsdl url from endpoint: {}'.format(wsdlurl))
         self.wsdl = wsdlurl
 
-        # the username must be in ePages format (but we want to hide this fact from the user)
+        # the username must be in ePages format (but we want to hide this
+        # fact from the user)
         user = "/Providers/{}/Users/{}".format(provider, username)
 
         # initialize our client using basic auth and with the wsdl file
@@ -59,9 +62,8 @@ class SimpleProvisioningService(BaseProvisioningService):
         self.client = client
 
         # the wsdl always points to localhost, change to our endpoint instead
-        # TODO: There must be a better way
 
-        # figure out our binding name
+        # figure out our binding name TODO: There must be a better way
         qname = str(client.service._binding.name)
         # and create new service with the name pointing to our endpoint
         service2 = client.create_service(qname, endpoint)
@@ -84,16 +86,35 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.create(data)
 
     def exists(self):
+        """
+        Check if shop exists
+        """
         raise NotImplementedError
 
     def getInfo(self):
+        """
+        Get shop information
+        """
         raise NotImplementedError
 
     def markForDeletion(self, data):
+        """
+        Mark the shop for deletion, it will be deleted by ePages after some
+        time (default 30 days)
+        """
         return self.service2.markForDeletion(data)
 
     def rename(self):
+        """
+        Rename shop
+
+        Warning: this might change some urls in the shop and confuse
+        search engines etc.
+        """
         raise NotImplementedError
 
     def update(self):
+        """
+        Update shop information
+        """
         raise NotImplementedError
