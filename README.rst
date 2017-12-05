@@ -42,6 +42,8 @@ Initialize the service and call it.
     }
     shopinfo = sp.create(shopdata)
 
+Then something
+
 Features
 --------
 
