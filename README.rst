@@ -28,7 +28,6 @@ Usage
 Initialize the service and call it.
 
 .. code-block:: python
- :linenos:
 
  from epages_provisioning import provisioning
  sp = provisioning.SimpleProvisioningService(
