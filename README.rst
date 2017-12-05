@@ -28,7 +28,7 @@ Usage
 
 Initialize the service and call it.
 
-.. code:: python
+```python
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
       endpoint = "https://example.com/epages/Site.soap,
@@ -41,6 +41,7 @@ Initialize the service and call it.
       'ShopType': 'MinDemo',
     }
     shopinfo = sp.create(shopdata)
+```
 
 Then something
 
