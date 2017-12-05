@@ -3,20 +3,59 @@
 
 """Tests for `epages_provisioning` package."""
 
-
+import os
 import unittest
+from datetime import datetime
 
-from epages_provisioning import epages_provisioning
+from epages_provisioning import provisioning
 
 
-class TestEpages_provisioning(unittest.TestCase):
-    """Tests for `epages_provisioning` package."""
+class TestSimpleProvisioning(unittest.TestCase):
+    """ Tests for `epages_provisioning` package.
+    All tests require that the environment variables:
 
-    def setUp(self):
-        """Set up test fixtures, if any."""
+        EP_ENDPOINT
+        EP_PROVIDER
+        EP_USERNAME
+        EP_PASSWORD
 
-    def tearDown(self):
-        """Tear down test fixtures, if any."""
+    are set
 
-    def test_000_something(self):
-        """Test something."""
+    For example:
+
+        export EP_ENDPOINT=http://tatu05.sml18.vilkas.pri/epages/Site.soap
+        export EP_PROVIDER=Distributor
+        export EP_USERNAME=admin
+        export EP_PASSWORD=admin
+        make test
+
+    These tests also assume that the ePages service is a default installation
+    with default shoptypes etc.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """ set up our client for the tests """
+        cls._sp = provisioning.SimpleProvisioningService(
+            endpoint=os.environ['EP_ENDPOINT'],
+            provider=os.environ['EP_PROVIDER'],
+            username=os.environ['EP_USERNAME'],
+            password=os.environ['EP_PASSWORD'],
+            )
+        # used as alias for these tests
+        cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
+
+    def test_000_create(self):
+        """ test creating new shop """
+        data = {
+            'Alias': 'test-{}'.format(self._nowstr),
+            'ShopType': 'MinDemo',
+        }
+        self._sp.create(data)
+
+    def test_001_delete(self):
+        """ test shop deletion, assumes that create was successfull """
+        data = {
+            'Alias': 'test-{}'.format(self._nowstr),
+        }
+        self._sp.markForDeletion(data)
