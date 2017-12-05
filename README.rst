@@ -28,7 +28,7 @@ Usage
 
 Initialize the service and call it.
 
-.. code-block:: python
+.. code:: python
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
       endpoint = "https://example.com/epages/Site.soap,
