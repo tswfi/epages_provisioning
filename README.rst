@@ -26,21 +26,19 @@ Python library for calling ePages provisioning services
 Usage
 -----
 
-
-    from epages_provisioning import provisioning
-    sp = provisioning.SimpleProvisioningService(
-            endpoint = "https://example.com/epages/Site.soap,
-            provider = "Distributor",
-            username = "admin",
-            password = "admin",
-            )
-    shopdata = {
-        'Alias': 'MyShop',
-	'ShopType': 'MinDemo',
-    }
-    shopinfo = sp.create(shopdata)
-
-
+... code-block:: python
+from epages_provisioning import provisioning
+sp = provisioning.SimpleProvisioningService(
+  endpoint = "https://example.com/epages/Site.soap,
+  provider = "Distributor",
+  username = "admin",
+  password = "admin",
+)
+shopdata = {
+  'Alias': 'MyShop',
+  'ShopType': 'MinDemo',
+}
+shopinfo = sp.create(shopdata)
 
 Features
 --------
