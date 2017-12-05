@@ -5,6 +5,7 @@
 
 import os
 import unittest
+from datetime import datetime
 
 from epages_provisioning import provisioning
 
@@ -36,17 +37,19 @@ class TestSimpleProvisioning(unittest.TestCase):
             username=os.environ['EP_USERNAME'],
             password=os.environ['EP_PASSWORD'],
             )
+        # used as alias for these tests
+        cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
 
     def test_000_create(self):
         """ test creating new shop """
         data = {
-            'Alias': 'foobar',
+            'Alias': 'test-{}'.format(self._nowstr),
             'ShopType': 'MinDemo',
         }
         self._sp.create(data)
 
     def test_001_delete(self):
         data = {
-            'Alias': 'foobar',
+            'Alias': 'test-{}'.format(self._nowstr),
         }
         self._sp.markForDeletion(data)

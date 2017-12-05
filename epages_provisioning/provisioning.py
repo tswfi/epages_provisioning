@@ -86,16 +86,16 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.create(data)
 
     def exists(self):
-        pass
+        raise NotImplementedError
 
     def getInfo(self):
-        pass
+        raise NotImplementedError
 
     def markForDeletion(self, data):
         return self.service2.markForDeletion(data)
 
     def rename(self):
-        pass
+        raise NotImplementedError
 
     def update(self):
-        pass
+        raise NotImplementedError
