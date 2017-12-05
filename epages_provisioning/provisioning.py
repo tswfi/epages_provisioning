@@ -63,8 +63,6 @@ class SimpleProvisioningService(BaseProvisioningService):
 
         # figure out our binding name
         qname = str(client.service._binding.name)
-        print("QNAME:", qname)
-
         # and create new service with the name pointing to our endpoint
         service2 = client.create_service(qname, endpoint)
         self.service2 = service2

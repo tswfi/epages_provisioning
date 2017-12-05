@@ -20,15 +20,32 @@ ePages provisioning
 
 Python library for calling ePages provisioning services
 
-
 * Free software: MIT license
 * Documentation: https://epages-provisioning.readthedocs.io.
+
+Usage
+-----
+
+
+    from epages_provisioning import provisioning
+    sp = provisioning.SimpleProvisioningService(
+            endpoint = "https://example.com/epages/Site.soap,
+            provider = "Distributor",
+            username = "admin",
+            password = "admin",
+            )
+    shopdata = {
+        'Alias': 'MyShop',
+	'ShopType': 'MinDemo',
+    }
+    shopinfo = sp.create(shopdata)
+
 
 
 Features
 --------
 
-* TODO
+* ePages SimpleProvisioningService for easy shop creation, modifying and deletion
 
 Credits
 ---------
@@ -37,4 +54,3 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-

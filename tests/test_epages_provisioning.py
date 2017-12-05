@@ -46,7 +46,7 @@ class TestSimpleProvisioning(unittest.TestCase):
             'Alias': 'test-{}'.format(self._nowstr),
             'ShopType': 'MinDemo',
         }
-        self._sp.create(data)
+        shopinfo = self._sp.create(data)
 
     def test_001_delete(self):
         data = {
