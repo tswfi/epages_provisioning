@@ -26,6 +26,8 @@ Python library for calling ePages provisioning services
 Usage
 -----
 
+Initialize the service and call it.
+
     .. code-block:: python
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
