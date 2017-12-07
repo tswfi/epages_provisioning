@@ -7,11 +7,18 @@ name = "pypi"
 
 [dev-packages]
 
+sphinx = "*"
+ipython = "*"
+docutils = "*"
+sphinx-autobuild = "*"
+restructuredtext-lint = "*"
+tox = "*"
+coverage = "*"
 
 
 [packages]
 
-ipython = "*"
+zeep = "*"
 
 
 [requires]
