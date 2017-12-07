@@ -7,7 +7,19 @@ import os
 import unittest
 from datetime import datetime
 
+import logging
+import http.client as http_client
+
 from epages_provisioning import provisioning
+
+# activate full logging to see what is on the wire
+http_client.HTTPConnection.debuglevel = 1
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
 
 
 class TestSimpleProvisioning(unittest.TestCase):
@@ -53,6 +65,7 @@ class TestSimpleProvisioning(unittest.TestCase):
             'ShopType': 'MinDemo',
         }
         self.assertIsNone(self._sp.create(data))
+        self.assertTrue(self._sp.get_info(data))
 
     def test_001_exists(self):
         """ test exists method, assumes that shop with alias "NotExistingAlias
@@ -66,6 +79,15 @@ class TestSimpleProvisioning(unittest.TestCase):
             'Alias': 'NotExistingAlias'
         }
         self.assertFalse(self._sp.exists(data))
+
+    def test_002_get_info(self):
+        """ test getinfo """
+        data = {
+            'Alias': self._shopalias
+        }
+        info = self._sp.get_info(data)
+        self.assertTrue(self._sp.get_info(data))
+        print(info)
 
     def test_999_mark_for_delete(self):
         """ test shop deletion, assumes that create was successfull """

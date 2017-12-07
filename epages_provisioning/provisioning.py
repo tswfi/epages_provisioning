@@ -70,7 +70,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         service2 = client.create_service(qname, endpoint)
         self.service2 = service2
 
-        logger.info('Initialized new client: %s', self.client)
+        logger.debug('Initialized new client: %s', self.client)
 
     def __build_full_username(self):
         """ build the username as a path """
@@ -81,7 +81,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         parsed = urlparse(self.endpoint)
         wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/SimpleProvisioningService{version}.wsdl'.format(
             uri=parsed, version=self.version)
-        logger.info('Built wsdl url from endpoint: %s', wsdlurl)
+        logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
     def create(self, data):
@@ -96,7 +96,7 @@ class SimpleProvisioningService(BaseProvisioningService):
 
 
         """
-        logger.debug('Creating shop with data: %s', data)
+        logger.info('Creating new shop with data: %s', data)
         return self.service2.create(data)
 
     def exists(self, data):
@@ -110,11 +110,11 @@ class SimpleProvisioningService(BaseProvisioningService):
         """
         return self.service2.exists(data)
 
-    def get_info(self):
+    def get_info(self, data):
         """
         Get shop information
         """
-        raise NotImplementedError
+        return self.service2.getInfo(data)
 
     def mark_for_deletion(self, data):
         """
