@@ -36,7 +36,7 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     For example:
 
-        export EP_ENDPOINT=http://tatu05.sml18.vilkas.pri/epages/Site.soap
+        export EP_ENDPOINT=http://example.com/epages/Site.soap
         export EP_PROVIDER=Distributor
         export EP_USERNAME=admin
         export EP_PASSWORD=admin

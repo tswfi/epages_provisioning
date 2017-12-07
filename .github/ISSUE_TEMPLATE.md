@@ -1,4 +1,5 @@
 * ePages provisioning version:
+* ePages version:
 * Python version:
 * Operating System:
 
