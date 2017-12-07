@@ -1,0 +1,12 @@
+# Read about pyup configuration here: https://pyup.io/docs/bot/config/
+
+# set the default branch
+# default: empty, the default branch on GitHub
+branch: develop
+
+# update schedule
+# default: empty
+# allowed: "every day", "every week", ..
+schedule: "every month"
+
+
