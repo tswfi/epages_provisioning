@@ -94,8 +94,6 @@ class SimpleProvisioningService(BaseProvisioningService):
 
         returns:
             TODO
-
-
         """
         logger.info('Creating new shop with data: %s', data)
         return self.service2.create(data)
@@ -130,13 +128,21 @@ class SimpleProvisioningService(BaseProvisioningService):
         Mark the shop for deletion, it will be deleted by ePages after some
         time (default 30 days)
 
+        Does a extra exists call before marking for deletion because
+        ePages service always returns None for this call
+
         input:
             TODO
 
         returns:
-            TODO
+            None if everything is ok, False if shop is not found
+
+        raises:
         """
-        return self.service2.markForDeletion(data)
+        if self.service2.exists(data):
+            return self.service2.markForDeletion(data)
+        else:
+            return False
 
     def rename(self):
         """
@@ -151,4 +157,5 @@ class SimpleProvisioningService(BaseProvisioningService):
         """
         Update shop information
         """
+
         raise NotImplementedError

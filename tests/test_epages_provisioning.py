@@ -107,7 +107,14 @@ class TestSimpleProvisioning(unittest.TestCase):
             },
             info)
 
-    def test_900_mark_for_delete(self):
+    def test_900_mark_for_delete_nonexisting(self):
+        """ test shop deletion with non existing shop """
+        data = {
+            'Alias': 'NotExistingShop',
+        }
+        self.assertFalse(self._sp.mark_for_deletion(data))
+
+    def test_901_mark_for_delete(self):
         """ test shop deletion, assumes that create was successfull """
         data = {
             'Alias': self._shopalias,
