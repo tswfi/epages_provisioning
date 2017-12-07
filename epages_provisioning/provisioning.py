@@ -58,6 +58,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         session.auth = HTTPBasicAuth(self.userpath, self.password)
         client = Client(
             wsdl=self.wsdl,
+            strict=False,  # ePages wsdl files are full of errors...
             transport=Transport(session=session)
         )
         self.client = client
@@ -104,8 +105,10 @@ class SimpleProvisioningService(BaseProvisioningService):
         Check if shop exists
 
         input:
+            TODO
 
         returns:
+            TODO
 
         """
         return self.service2.exists(data)
@@ -113,6 +116,12 @@ class SimpleProvisioningService(BaseProvisioningService):
     def get_info(self, data):
         """
         Get shop information
+
+        input:
+            TODO
+
+        returns:
+            TODO
         """
         return self.service2.getInfo(data)
 
@@ -120,6 +129,12 @@ class SimpleProvisioningService(BaseProvisioningService):
         """
         Mark the shop for deletion, it will be deleted by ePages after some
         time (default 30 days)
+
+        input:
+            TODO
+
+        returns:
+            TODO
         """
         return self.service2.markForDeletion(data)
 

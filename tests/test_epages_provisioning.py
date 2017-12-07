@@ -10,6 +10,7 @@ from datetime import datetime
 import logging
 import http.client as http_client
 
+from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
 
 # activate full logging to see what is on the wire
@@ -58,8 +59,8 @@ class TestSimpleProvisioning(unittest.TestCase):
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._shopalias = 'test-{}'.format(cls._nowstr)
 
-    def test_000_create(self):
-        """ test creating new shop """
+    def test_000_create_mindata(self):
+        """ test creating new shop with minimal data """
         data = {
             'Alias': self._shopalias,
             'ShopType': 'MinDemo',
@@ -67,7 +68,18 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertIsNone(self._sp.create(data))
         self.assertTrue(self._sp.get_info(data))
 
-    def test_001_exists(self):
+    def test_001_create_missingdata(self):
+        """ test creating with missing data """
+        # ShopType is mandatory
+        data = {
+            'Alias': self._shopalias,
+        }
+        with self.assertRaises(ValidationError) as e:
+            self._sp.create(data)
+
+        self.assertEqual(e.exception.message, "Missing element ShopType")
+
+    def test_010_exists(self):
         """ test exists method, assumes that shop with alias "NotExistingAlias
         does not exists in the ePages system """
         data = {
@@ -80,18 +92,24 @@ class TestSimpleProvisioning(unittest.TestCase):
         }
         self.assertFalse(self._sp.exists(data))
 
-    def test_002_get_info(self):
+    def test_020_get_info(self):
         """ test getinfo """
         data = {
             'Alias': self._shopalias
         }
         info = self._sp.get_info(data)
         self.assertTrue(self._sp.get_info(data))
-        print(info)
+        self.assertDictContainsSubset(
+            {
+                'Alias': self._shopalias,
+                'MerchantLogin': None,
+                'IsClosed': False,
+            },
+            info)
 
-    def test_999_mark_for_delete(self):
+    def test_900_mark_for_delete(self):
         """ test shop deletion, assumes that create was successfull """
         data = {
             'Alias': self._shopalias,
         }
-        self._sp.mark_for_deletion(data)
+        self.assertIsNone(self._sp.mark_for_deletion(data))
