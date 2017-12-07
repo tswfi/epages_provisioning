@@ -22,35 +22,9 @@ Python library for calling ePages provisioning services
 * Free software: MIT license
 * Documentation: https://epages-provisioning.readthedocs.io.
 
-Installation
-------------
+.. include:: installation.rst
 
-.. code-block:: bash
-
-  pip install epages_provisioning
-
-
-Usage
------
-
-Initialize the service and call it.
-
-.. code-block:: python
-
- from epages_provisioning import provisioning
- sp = provisioning.SimpleProvisioningService(
-   endpoint = "https://example.com/epages/Site.soap,
-   provider = "Distributor",
-   username = "admin",
-   password = "admin",
- )
- shopdata = {
-   'Alias': 'MyShop',
-   'ShopType': 'MinDemo',
- }
- shopinfo = sp.create(shopdata)
-
-Then something
+.. include:: usage.rst
 
 Features
 --------
