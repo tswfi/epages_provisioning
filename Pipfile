@@ -12,6 +12,8 @@ ipython = "*"
 docutils = "*"
 sphinx-autobuild = "*"
 restructuredtext-lint = "*"
+tox = "*"
+coverage = "*"
 
 
 [packages]

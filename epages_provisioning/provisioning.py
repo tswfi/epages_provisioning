@@ -80,8 +80,10 @@ class SimpleProvisioningService(BaseProvisioningService):
     def __build_wsdl_url_from_endpoint(self):
         """ Builds url to the wsdl from endpoint and version number """
         parsed = urlparse(self.endpoint)
-        wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/SimpleProvisioningService{version}.wsdl'.format(
-            uri=parsed, version=self.version)
+        wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/'\
+                  'SimpleProvisioningService{version}.wsdl'.format(
+                     uri=parsed, version=self.version
+                  )
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
