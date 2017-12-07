@@ -8,7 +8,12 @@ http://tatu05.sml18.vilkas.pri/WebRoot/WSDL/SimpleProvisioningService6.wsdl
 
 """
 import logging
-from urllib.parse import urlparse
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from zeep import Client
@@ -23,7 +28,7 @@ class BaseProvisioningService(object):
     """
 
     def __init__(self, endpoint="", provider="", username="", password=""):
-        super().__init__()
+        super(BaseProvisioningService, self).__init__()
         self.endpoint = endpoint
         self.provider = provider
         self.username = username
@@ -42,7 +47,7 @@ class SimpleProvisioningService(BaseProvisioningService):
                  username="",
                  password="",
                  version="6"):
-        super().__init__(
+        super(SimpleProvisioningService, self).__init__(
             endpoint=endpoint,
             provider=provider,
             username=username,

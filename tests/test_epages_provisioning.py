@@ -7,8 +7,8 @@ import os
 import unittest
 from datetime import datetime
 
-import logging
-import http.client as http_client
+#import logging
+#import http.client as http_client
 
 from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
