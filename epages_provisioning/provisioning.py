@@ -85,7 +85,35 @@ class SimpleProvisioningService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def create(self, data):
+    def get_createshop_type(self):
+        """ get the create type """
+        return self.client.get_type('ns0:TCreateShop')
+
+    def get_createshop_obj(self, data={}):
+        """ get shop object for creation """
+        return self.get_createshop_type()(**data)
+
+    def get_shopref_type(self):
+        return self.client.get_type('ns0:TShopRef')
+
+    def get_shopref_obj(self, data={}):
+        """ get shop object for exists, getinfo and markfor deletion calls """
+        return self.get_shopref_type()(**data)
+
+    def get_updateshop_type(self):
+        return self.client.get_type('ns0:TUpdateShop')
+
+    def get_updateshop_obj(self, data={}):
+        """ get shop object for update call """
+        return self.get_updateshop_type()(**data)
+
+    def get_rename_type(self):
+        return self.client.get_type('ns0:TRename_Input')
+
+    def get_rename_obj(self, data={}):
+        return self.get_rename_type()(**data)
+
+    def create(self, shop):
         """
         Creates new shop
 
@@ -95,10 +123,14 @@ class SimpleProvisioningService(BaseProvisioningService):
         returns:
             TODO
         """
-        logger.info('Creating new shop with data: %s', data)
-        return self.service2.create(data)
+        if not isinstance(shop, type(self.get_createshop_obj())):
+            raise TypeError(
+                "Get shop from get_createshop_obj and call with that")
 
-    def exists(self, data):
+        logger.info('Creating new shop with data: %s', shop)
+        return self.service2.create(shop)
+
+    def exists(self, shop):
         """
         Check if shop exists
 
@@ -109,9 +141,12 @@ class SimpleProvisioningService(BaseProvisioningService):
             TODO
 
         """
-        return self.service2.exists(data)
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError("Get shop from get_shopref_obj and call with that")
 
-    def get_info(self, data):
+        return self.service2.exists(shop)
+
+    def get_info(self, shop):
         """
         Get shop information
 
@@ -121,9 +156,13 @@ class SimpleProvisioningService(BaseProvisioningService):
         returns:
             TODO
         """
-        return self.service2.getInfo(data)
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
 
-    def mark_for_deletion(self, data):
+        return self.service2.getInfo(shop)
+
+    def mark_for_deletion(self, shop):
         """
         Mark the shop for deletion, it will be deleted by ePages after some
         time (default 30 days)
@@ -139,23 +178,34 @@ class SimpleProvisioningService(BaseProvisioningService):
 
         raises:
         """
-        if self.service2.exists(data):
-            return self.service2.markForDeletion(data)
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        if self.service2.exists(shop):
+            return self.service2.markForDeletion(shop)
         else:
             return False
 
-    def rename(self):
+    def rename(self, shop):
         """
         Rename shop
 
         Warning: this might change some urls in the shop and confuse
         search engines etc.
         """
+        if not isinstance(shop, type(self.get_rename_obj())):
+            raise TypeError(
+                "Get shop from get_rename_obj and call with that")
+
         raise NotImplementedError
 
-    def update(self):
+    def update(self, shop):
         """
         Update shop information
         """
+        if not isinstance(shop, type(self.get_updateshop_obj())):
+            raise TypeError(
+                "Get shop from get_updateshop_obj and call with that")
 
         raise NotImplementedError

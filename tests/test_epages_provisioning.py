@@ -64,49 +64,63 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     def test_000_create_mindata(self):
         """ test creating new shop with minimal data """
-        data = {
-            'Alias': self._shopalias_min,
-            'ShopType': 'MinDemo',
-        }
-        self.assertIsNone(self._sp.create(data))
-        self.assertTrue(self._sp.get_info(data))
+        shop = self._sp.get_createshop_obj(
+            {
+                'Alias': self._shopalias_min,
+                'ShopType': 'MinDemo',
+            }
+        )
+        self.assertIsNone(self._sp.create(shop))
 
     def test_001_create_missingdata(self):
         """ test creating with missing data """
         # ShopType is mandatory
-        data = {
-            'Alias': self._shopalias_min,
-        }
+        shop = self._sp.get_createshop_obj(
+            {
+                'Alias': self._shopalias_min,
+            }
+        )
         with self.assertRaises(ValidationError) as e:
-            self._sp.create(data)
+            self._sp.create(shop)
 
         self.assertEqual(e.exception.message, "Missing element ShopType")
 
     def test_002_create_with_additional(self):
-        return # for now
-        data = {
-            'Alias': self._shopalias_add,
-            'ShopType': 'MinDemo',
-            'IsClosed': 1,
-            'IsTrialShop': 1,
-            'IsInternalTestShop': 1,
-            'DomainName': 'test-domain-1',
-            'HasSSLCertificate': 0,
-            'MerchantLogin': 'test',
-            'MerchantPassword': '123456',
-            'MerchantEMail': 'test@example.com',
-            'AdditionalAttributes': [],
-        }
-        attributetype = self._sp.client.get_type('ns1:TAttribute')
-        attribute1 = attributetype(
-            Name='TestType',
-            Type='String',
-            Value='TestScript',
+        shop = self._sp.get_createshop_obj(
+            {
+                'Alias': self._shopalias_add,
+                'ShopType': 'MinDemo',
+                'IsClosed': 1,
+                'IsTrialShop': 1,
+                'IsInternalTestShop': 1,
+                # 'HasSSLCertificate': 0,
+                'MerchantLogin': 'test',
+                'MerchantPassword': '123456',
+                'MerchantEMail': 'test@example.com',
+                'Name': 'TestShop',
+                'AdditionalAttributes': [
+                    {
+                        'Name': 'Channel',
+                            'Type': 'String',
+                            'Value': 'TestScript'
+                    },
+                    {
+                        'Name': 'Likeability',
+                        'Type': 'Integer',
+                        'Value': '1'
+                    },
+                ],
+            }
         )
-        data['AdditionalAttributes'].append(attribute1)
-        self.assertIsNone(self._sp.create(data))
-        self.assertTrue(self._sp.get_info(data))
+        self.assertIsNone(self._sp.create(shop))
 
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_add,
+            }
+        )
+        self.assertTrue(self._sp.get_info(shop))
+        # TODO check that the additionalattributes are there
 #        self.assertDictContainsSubset(
 #            {
 #                'Alias': self._shopalias_min,
@@ -117,41 +131,60 @@ class TestSimpleProvisioning(unittest.TestCase):
     def test_010_exists(self):
         """ test exists method, assumes that shop with alias "NotExistingAlias
         does not exists in the ePages system """
-        data = {
-            'Alias': self._shopalias_min
-        }
-        self.assertTrue(self._sp.exists(data))
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_min,
+            }
+        )
 
-        data = {
-            'Alias': 'NotExistingAlias'
-        }
-        self.assertFalse(self._sp.exists(data))
+        self.assertTrue(self._sp.exists(shop))
+
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': 'NotExistingAlias',
+            }
+        )
+        self.assertFalse(self._sp.exists(shop))
 
     def test_020_get_info(self):
         """ test getinfo """
-        data = {
-            'Alias': self._shopalias_min
-        }
-        info = self._sp.get_info(data)
-        self.assertTrue(self._sp.get_info(data))
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_min,
+            }
+        )
+
+        info = self._sp.get_info(shop)
+        self.assertTrue(info)
         self.assertDictContainsSubset(
             {
                 'Alias': self._shopalias_min,
                 'MerchantLogin': None,
                 'IsClosed': False,
             },
-            info)
+            info
+        )
 
     def test_900_mark_for_delete_not(self):
         """ test shop deletion with non existing shop """
-        data = {
-            'Alias': 'NotExistingShop',
-        }
-        self.assertFalse(self._sp.mark_for_deletion(data))
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': 'NotExistingAlias',
+            }
+        )
+        self.assertFalse(self._sp.mark_for_deletion(shop))
 
     def test_901_mark_for_delete(self):
-        """ test shop deletion, assumes that create was successfull """
-        data = {
-            'Alias': self._shopalias_min,
-        }
-        self.assertIsNone(self._sp.mark_for_deletion(data))
+        """ test shop deletion, assumes that creates were successfull """
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_min,
+            }
+        )
+        self.assertIsNone(self._sp.mark_for_deletion(shop))
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_add,
+            }
+        )
+        self.assertIsNone(self._sp.mark_for_deletion(shop))
