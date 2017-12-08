@@ -15,6 +15,7 @@ restructuredtext-lint = "*"
 tox = "*"
 coverage = "*"
 twine = "*"
+bumpversion = "*"
 
 
 [packages]
