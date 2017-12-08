@@ -2,10 +2,6 @@
 """
 ePages provisioning service
 
-Uses the following wsdl files from ePages
-
-http://tatu05.sml18.vilkas.pri/WebRoot/WSDL/SimpleProvisioningService6.wsdl
-
 """
 import logging
 
@@ -39,6 +35,14 @@ class SimpleProvisioningService(BaseProvisioningService):
     """
     Simple provisioning, handles creating updating and deleting shops in ePages
     environment.
+
+    By default uses the following wsdl file from ePages:
+
+    https://example.com/WebRoot/WSDL/SimpleProvisioningService6.wsdl
+
+    You can also define the version to get other versions of the wsdl.
+
+    The wsdl location is built from endpoint information.
     """
 
     def __init__(self,
@@ -87,7 +91,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         parsed = urlparse(self.endpoint)
         wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/'\
                   'SimpleProvisioningService{version}.wsdl'.format(
-                     uri=parsed, version=self.version
+                      uri=parsed, version=self.version
                   )
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
@@ -101,6 +105,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.get_createshop_type()(**data)
 
     def get_shopref_type(self):
+        """ get shopref factory """
         return self.client.get_type('ns0:TShopRef')
 
     def get_shopref_obj(self, data={}):
@@ -108,6 +113,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.get_shopref_type()(**data)
 
     def get_updateshop_type(self):
+        """ get updateshop factory """
         return self.client.get_type('ns0:TUpdateShop')
 
     def get_updateshop_obj(self, data={}):
@@ -115,20 +121,24 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.get_updateshop_type()(**data)
 
     def get_rename_type(self):
+        """ get rename type factory """
         return self.client.get_type('ns0:TRename_Input')
 
     def get_rename_obj(self, data={}):
+        """ get rename object """
         return self.get_rename_type()(**data)
 
     def create(self, shop):
         """
         Creates new shop
 
-        input:
-            TODO
+        sp = provisioning.SimpleProvisioningService(...)
+        shop = sp.factory_createshop_obj()
+        shop.Alias = "TestShop"
+        shop.ShopType = "MinDemo"
+        sp.create(shop)
 
-        returns:
-            TODO
+        returns None when everything is ok.
         """
         if not isinstance(shop, type(self.get_createshop_obj())):
             raise TypeError(
@@ -141,11 +151,9 @@ class SimpleProvisioningService(BaseProvisioningService):
         """
         Check if shop exists
 
-        input:
-            TODO
-
-        returns:
-            TODO
+        shopref = sp.get_shopref_obj()
+        shopref.Alias = "ExistingShop"
+        exists = sp.get_info(shopref)
 
         """
         if not isinstance(shop, type(self.get_shopref_obj())):
@@ -157,11 +165,10 @@ class SimpleProvisioningService(BaseProvisioningService):
         """
         Get shop information
 
-        input:
-            TODO
+        shopref = sp.get_shopref_obj()
+        shopref.Alias = "ExistingShop"
+        info = sp.get_info(shopref)
 
-        returns:
-            TODO
         """
         if not isinstance(shop, type(self.get_shopref_obj())):
             raise TypeError(
@@ -177,13 +184,11 @@ class SimpleProvisioningService(BaseProvisioningService):
         Does a extra exists call before marking for deletion because
         ePages service always returns None for this call
 
-        input:
-            TODO
+        deleteshop = sp.get_shopref_obj()
+        deleteshop.Alias = "ExistingShop"
+        sp.delete(deleteshop)
 
-        returns:
-            None if everything is ok, False if shop is not found
-
-        raises:
+        returns None if the operation was successfull
         """
         if not isinstance(shop, type(self.get_shopref_obj())):
             raise TypeError(
@@ -200,19 +205,33 @@ class SimpleProvisioningService(BaseProvisioningService):
 
         Warning: this might change some urls in the shop and confuse
         search engines etc.
+
+        renameshop = sp.get_rename_obj()
+        renameshop.Alias = "ExistingAlias"
+        renameshop.NewAlias = "NewAlias"
+        sp.rename(renamshop)
+
+        returns None if the operation was successfull
         """
         if not isinstance(shop, type(self.get_rename_obj())):
             raise TypeError(
                 "Get shop from get_rename_obj and call with that")
 
-        raise NotImplementedError
+        return self.service2.rename(shop)
 
     def update(self, shop):
         """
-        Update shop information
+        Update shop information.
+
+        updateshop = sp.get_updateshop_obj()
+        updateshop.Alias = "ExistingAlias"
+        updateshop.IsClosed = 1
+        sp.update(updateshop)
+
+        returns None if the operation was successfull
         """
         if not isinstance(shop, type(self.get_updateshop_obj())):
             raise TypeError(
                 "Get shop from get_updateshop_obj and call with that")
 
-        raise NotImplementedError
+        return self.service2.update(shop)

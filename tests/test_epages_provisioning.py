@@ -7,15 +7,14 @@ import os
 import unittest
 from datetime import datetime
 
-#import logging
-#import http.client as http_client
+# import logging
+# import http.client as http_client
 
 from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
 
 # activate full logging to see what is on the wire
 # http_client.HTTPConnection.debuglevel = 1
-
 # logging.basicConfig()
 # logging.getLogger().setLevel(logging.DEBUG)
 # requests_log = logging.getLogger("requests.packages.urllib3")
@@ -50,7 +49,9 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """ set up our client for the tests """
+        """
+        set up our client for the tests
+        """
         cls._sp = provisioning.SimpleProvisioningService(
             endpoint=os.environ['EP_ENDPOINT'],
             provider=os.environ['EP_PROVIDER'],
@@ -60,10 +61,13 @@ class TestSimpleProvisioning(unittest.TestCase):
         # used as alias for these tests
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
+        cls._shopalias_min_tmp = 'test-{}-min_tmp'.format(cls._nowstr)
         cls._shopalias_add = 'test-{}-add'.format(cls._nowstr)
 
     def test_000_create_mindata(self):
-        """ test creating new shop with minimal data """
+        """
+        test creating new shop with minimal data
+        """
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_min,
@@ -73,7 +77,9 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertIsNone(self._sp.create(shop))
 
     def test_001_create_missingdata(self):
-        """ test creating with missing data """
+        """
+        test creating with missing data
+        """
         # ShopType is mandatory
         shop = self._sp.get_createshop_obj(
             {
@@ -129,8 +135,10 @@ class TestSimpleProvisioning(unittest.TestCase):
 #            info)
 
     def test_010_exists(self):
-        """ test exists method, assumes that shop with alias "NotExistingAlias
-        does not exists in the ePages system """
+        """
+        test exists method, assumes that shop with alias "NotExistingAlias
+        does not exists in the ePages system
+        """
         shop = self._sp.get_shopref_obj(
             {
                 'Alias': self._shopalias_min,
@@ -147,7 +155,9 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertFalse(self._sp.exists(shop))
 
     def test_020_get_info(self):
-        """ test getinfo """
+        """
+        test getinfo
+        """
         shop = self._sp.get_shopref_obj(
             {
                 'Alias': self._shopalias_min,
@@ -165,8 +175,44 @@ class TestSimpleProvisioning(unittest.TestCase):
             info
         )
 
+    def test_030_update(self):
+        """
+        Test updating shop data
+        """
+        update = self._sp.get_updateshop_obj(
+            {
+                'Alias': self._shopalias_min,
+                'IsClosed': 1,
+                'Name': "Test shop updated"
+            }
+        )
+        self.assertIsNone(self._sp.update(update))
+
+    def test_040_rename(self):
+        """
+        test rename operation (twice to get the name back to what it was)
+        """
+        rename = self._sp.get_rename_obj(
+            {
+                'Alias': self._shopalias_min,
+                'NewAlias': self._shopalias_min_tmp,
+            }
+        )
+        self.assertIsNone(self._sp.rename(rename))
+
+        # and rename back for others
+        rename = self._sp.get_rename_obj(
+            {
+                'Alias': self._shopalias_min_tmp,
+                'NewAlias': self._shopalias_min,
+            }
+        )
+        self.assertIsNone(self._sp.rename(rename))
+
     def test_900_mark_for_delete_not(self):
-        """ test shop deletion with non existing shop """
+        """
+        test shop deletion with non existing shop
+        """
         shop = self._sp.get_shopref_obj(
             {
                 'Alias': 'NotExistingAlias',
@@ -175,7 +221,9 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertFalse(self._sp.mark_for_deletion(shop))
 
     def test_901_mark_for_delete(self):
-        """ test shop deletion, assumes that creates were successfull """
+        """
+        test shop deletion, assumes that creates were successfull
+        """
         shop = self._sp.get_shopref_obj(
             {
                 'Alias': self._shopalias_min,

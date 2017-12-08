@@ -101,7 +101,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, 3.3, 3.4 and 3.5, and for PyPy. Check
+3. The pull request should work for Python 2.7 and 3.6, and for PyPy. Check
    https://travis-ci.org/tswfi/epages_provisioning/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
@@ -111,3 +111,24 @@ Tips
 To run a subset of tests::
 
     $ python -m unittest tests.test_epages_provisioning
+
+
+Releasing new version
+---------------------
+
+When you are ready to release a new version follow these steps:
+
+1. Merge all changes that should be included in the new release to master.
+   And checkout master.
+2. Update HISTORY.rst with the new version number and changes. And commit your
+   changes to master.
+3. run::
+
+    $ bumpversion patch|minor|major
+
+4. push to master with tags to trigger travis deploy::
+
+    $ git push --tags
+    $ git push
+
+Travis will build the tag and when it is successfull will also deploy to pypi
