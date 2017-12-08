@@ -61,8 +61,15 @@ class TestShopConfiguration(unittest.TestCase):
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
 
-    def test_000_create(self):
-        self.assertTrue(False)
+    def test_000_get_all_info(self):
+        """ get info of all shops for this provider """
+        self.assertTrue(self._sp.all_info())
+
+    def test_010_getinfo(self):
+        infotype = self._sp.client.get_type('ns0:TInfoShop_Input')
+        infoshop = infotype()
+        infoshop.Alias="DemoShop"
+        self.assertTrue(self._sp.service2.getInfo(infoshop))
 
 
 class TestSimpleProvisioning(unittest.TestCase):
@@ -107,6 +114,10 @@ class TestSimpleProvisioning(unittest.TestCase):
         cls._shopalias_min_tmp = 'test-{}-min_tmp'.format(cls._nowstr)
         cls._shopalias_add = 'test-{}-add'.format(cls._nowstr)
 
+        # this is probably the smallest shoptype for testing, others might be
+        # "EBiz5" or "eCMSFree"
+        cls._shoptype = "MinDemo"
+
     def test_000_create_mindata(self):
         """
         test creating new shop with minimal data
@@ -114,7 +125,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_min,
-                'ShopType': 'MinDemo',
+                'ShopType': self._shoptype,
             }
         )
         self.assertIsNone(self._sp.create(shop))
@@ -138,7 +149,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_add,
-                'ShopType': 'MinDemo',
+                'ShopType': self._shoptype,
                 'IsClosed': 1,
                 'IsTrialShop': 1,
                 'IsInternalTestShop': 1,
@@ -150,8 +161,8 @@ class TestSimpleProvisioning(unittest.TestCase):
                 'AdditionalAttributes': [
                     {
                         'Name': 'Channel',
-                            'Type': 'String',
-                            'Value': 'TestScript'
+                        'Type': 'String',
+                        'Value': 'TestScript'
                     },
                     {
                         'Name': 'Likeability',

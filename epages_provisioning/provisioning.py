@@ -87,7 +87,7 @@ class ShopConfigService(BaseProvisioningService):
                  provider="",
                  username="",
                  password="",
-                 version="12"):
+                 version="11"): # TODO: 12 after ePages fixes getAllInfo
         super(ShopConfigService, self).__init__(
             endpoint=endpoint,
             provider=provider,
@@ -108,8 +108,14 @@ class ShopConfigService(BaseProvisioningService):
         return wsdlurl
 
     def all_info(self):
+        """ it seems that the ePages service is broken """
         return self.service2.getAllInfo()
 
+
+    def get_info(self):
+        self.client.get_type('ns1:TInfoShop_Input')
+
+        return self.service2.getInfo(shop)
 
 class SimpleProvisioningService(BaseProvisioningService):
     """
