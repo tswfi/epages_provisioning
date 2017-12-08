@@ -22,6 +22,49 @@ from epages_provisioning import provisioning
 # requests_log.propagate = True
 
 
+class TestShopConfiguration(unittest.TestCase):
+    """ Tests for `epages_provisioning` package.
+    All tests require that the environment variables:
+
+        EP_ENDPOINT
+        EP_PROVIDER
+        EP_USERNAME
+        EP_PASSWORD
+
+    are set
+
+    For example:
+
+        export EP_ENDPOINT=http://example.com/epages/Site.soap
+        export EP_PROVIDER=Distributor
+        export EP_USERNAME=admin
+        export EP_PASSWORD=admin
+        make test
+
+    These tests also assume that the ePages service is a default installation
+    with default shoptypes etc.
+
+    Warning: these will take a while to run.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        set up our client for the tests
+        """
+        cls._sp = provisioning.ShopConfigService(
+            endpoint=os.environ['EP_ENDPOINT'],
+            provider=os.environ['EP_PROVIDER'],
+            username=os.environ['EP_USERNAME'],
+            password=os.environ['EP_PASSWORD'],
+        )
+        # used as alias for these tests
+        cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
+
+    def test_000_create(self):
+        self.assertTrue(False)
+
+
 class TestSimpleProvisioning(unittest.TestCase):
     """ Tests for `epages_provisioning` package.
     All tests require that the environment variables:
