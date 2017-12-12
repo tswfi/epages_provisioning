@@ -19,14 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class BaseProvisioningService(object):
-    """
-    Base for provisioning services
+    """ Base for provisioning services
 
     :param endpoint: server to use e.g. https://example.com/
     :param provider: provider name
     :param username: username
     :param password: password
-    :param version: wsdl version number
+    :param version: wsdl version number, defaults to latest version available
     """
     def __init__(
             self,
@@ -231,9 +230,9 @@ class ShopConfigService(BaseProvisioningService):
 
 
 class SimpleProvisioningService(BaseProvisioningService):
-    """
-    Simple provisioning, handles creating updating and deleting shops in ePages
-    environment.
+    """ Simple provisioning
+
+    handles creating updating and deleting shops in ePages environment.
 
     By default uses the following wsdl file from ePages:
 
@@ -285,8 +284,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.client.get_type('ns0:TRename_Input')(**data)
 
     def create(self, shop):
-        """
-        Creates new shop
+        """ Creates new shop
 
         sp = provisioning.SimpleProvisioningService(...)
         shop = sp.factory_createshop_obj()
@@ -304,8 +302,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.create(shop)
 
     def exists(self, shop):
-        """
-        Check if shop exists
+        """ Check if shop exists
 
         shopref = sp.get_shopref_obj()
         shopref.Alias = "ExistingShop"
@@ -318,8 +315,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.exists(shop)
 
     def get_info(self, shop):
-        """
-        Get shop information
+        """ Get shop information
 
         shopref = sp.get_shopref_obj()
         shopref.Alias = "ExistingShop"
@@ -333,9 +329,9 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.getInfo(shop)
 
     def mark_for_deletion(self, shop):
-        """
-        Mark the shop for deletion, it will be deleted by ePages after some
-        time (default 30 days)
+        """ Mark the shop for deletion
+
+        The shop will be deleted by ePages after some time (default 30 days)
 
         Does a extra exists call before marking for deletion because
         ePages service always returns None for this call
@@ -356,8 +352,7 @@ class SimpleProvisioningService(BaseProvisioningService):
             return False
 
     def rename(self, shop):
-        """
-        Rename shop
+        """ Rename shop
 
         Warning: this might change some urls in the shop and confuse
         search engines etc.
@@ -376,8 +371,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.rename(shop)
 
     def update(self, shop):
-        """
-        Update shop information.
+        """ Update shop information.
 
         updateshop = sp.get_updateshop_obj()
         updateshop.Alias = "ExistingAlias"
