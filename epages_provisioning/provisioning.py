@@ -22,7 +22,7 @@ class BaseProvisioningService(object):
     """
     Base for provisioning services
 
-    :param endpoint: soap endpoint for the service
+    :param endpoint: server to use e.g. https://example.com/
     :param provider: provider name
     :param username: username
     :param password: password
@@ -30,7 +30,7 @@ class BaseProvisioningService(object):
     """
     def __init__(
             self,
-            endpoint="",
+            server="",
             provider="",
             username="",
             password="",
@@ -42,12 +42,14 @@ class BaseProvisioningService(object):
 
         super(BaseProvisioningService, self).__init__()
 
-        self.endpoint = endpoint
+        self.server = server
+
         self.provider = provider
         self.username = username
         self.password = password
         self.version = version
 
+        self.endpoint = self._build_endpoint_from_server()
         self.wsdl = self._build_wsdl_url_from_endpoint()
         self.userpath = self._build_full_username()
 
@@ -64,8 +66,12 @@ class BaseProvisioningService(object):
         # figure out our binding name TODO: There must be a better way
         qname = str(client.service._binding.name)
         # and create new service with the name pointing to our endpoint
-        self.service2 = client.create_service(qname, endpoint)
+        self.service2 = client.create_service(qname, self.endpoint)
         logger.debug('Initialized new client: %s', self.client)
+
+    def _build_endpoint_from_server(self):
+        """ Build endpoint url from server """
+        return "{}/epages/Site.soap".format(self.server)
 
     def _build_wsdl_url_from_endpoint(self):
         """ you need to implement this method in subclasses, each service has
@@ -83,13 +89,13 @@ class ShopConfigService(BaseProvisioningService):
     """
 
     def __init__(self,
-                 endpoint="",
+                 server="",
                  provider="",
                  username="",
                  password="",
-                 version="11"): # TODO: 12 after ePages fixes getAllInfo
+                 version="11"):  # TODO: 12 after ePages fixes getAllInfo
         super(ShopConfigService, self).__init__(
-            endpoint=endpoint,
+            server=server,
             provider=provider,
             username=username,
             password=password,
@@ -117,6 +123,7 @@ class ShopConfigService(BaseProvisioningService):
 
         return self.service2.getInfo(shop)
 
+
 class SimpleProvisioningService(BaseProvisioningService):
     """
     Simple provisioning, handles creating updating and deleting shops in ePages
@@ -132,13 +139,13 @@ class SimpleProvisioningService(BaseProvisioningService):
     """
 
     def __init__(self,
-                 endpoint="",
+                 server="",
                  provider="",
                  username="",
                  password="",
                  version="6"):
         super(SimpleProvisioningService, self).__init__(
-            endpoint=endpoint,
+            server=server,
             provider=provider,
             username=username,
             password=password,
