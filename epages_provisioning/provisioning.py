@@ -267,37 +267,21 @@ class SimpleProvisioningService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def get_createshop_type(self):
-        """ get the create type """
-        return self.client.get_type('ns0:TCreateShop')
-
     def get_createshop_obj(self, data={}):
         """ get shop object for creation """
-        return self.get_createshop_type()(**data)
-
-    def get_shopref_type(self):
-        """ get shopref factory """
-        return self.client.get_type('ns0:TShopRef')
+        return self.client.get_type('ns0:TCreateShop')(**data)
 
     def get_shopref_obj(self, data={}):
         """ get shop object for exists, getinfo and markfor deletion calls """
-        return self.get_shopref_type()(**data)
-
-    def get_updateshop_type(self):
-        """ get updateshop factory """
-        return self.client.get_type('ns0:TUpdateShop')
+        return self.client.get_type('ns0:TShopRef')(**data)
 
     def get_updateshop_obj(self, data={}):
         """ get shop object for update call """
-        return self.get_updateshop_type()(**data)
-
-    def get_rename_type(self):
-        """ get rename type factory """
-        return self.client.get_type('ns0:TRename_Input')
+        return self.client.get_type('ns0:TUpdateShop')(**data)
 
     def get_rename_obj(self, data={}):
         """ get rename object """
-        return self.get_rename_type()(**data)
+        return self.client.get_type('ns0:TRename_Input')(**data)
 
     def create(self, shop):
         """
