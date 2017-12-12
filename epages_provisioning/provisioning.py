@@ -63,8 +63,9 @@ class BaseProvisioningService(object):
         )
         self.client = client
 
-        # figure out our binding name TODO: There must be a better way
-        qname = str(client.service._binding.name)
+        # get the binding name, there is only one so this should be ok
+        qname = list(client.wsdl.bindings)[0]
+
         # and create new service with the name pointing to our endpoint
         self.service2 = client.create_service(qname, self.endpoint)
         logger.debug('Initialized new client: %s', self.client)
