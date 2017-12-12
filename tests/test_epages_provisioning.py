@@ -66,21 +66,38 @@ class TestShopConfiguration(unittest.TestCase):
         # used as alias for these tests
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
+        cls._shoptype = 'MinDemo'
 
     def test_000_get_all_info(self):
         """ get info of all shops for this provider """
         self.assertTrue(self._sc.get_all_info())
 
-    def test_010_getinfo(self):
-        infoshop = self._sc.get_infoshop_obj()
-        infoshop.Alias = "DemoShop"
-        self.assertTrue(self._sc.get_info(infoshop))
+    def test_010_create_mindata(self):
+        shop = self._sc.get_createshop_obj()
+        shop.Alias = self._shopalias_min
+        shop.ShopAlias = self._shopalias_min
+        shop.ShopType = self._shoptype
+        self.assertTrue(self._sc.create(shop))
 
     def test_020_exists(self):
         shopref = self._sc.get_shopref_obj()
-        shopref.Alias = "DemoShop"
+        shopref.Alias = self._shopalias_min
         self.assertTrue(self._sc.exists(shopref))
 
+    def test_030_getinfo(self):
+        infoshop = self._sc.get_infoshop_obj()
+        infoshop.Alias = self._shopalias_min
+        self.assertTrue(self._sc.get_info(infoshop))
+
+    def test_040_delete(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        self.assertIsNone(self._sc.delete(shopref))
+
+    def test_050_deleteref(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        self.assertIsNone(self._sc.delete_shopref(shopref))
 
 class TestSimpleProvisioning(unittest.TestCase):
     """ Tests for `epages_provisioning` package.

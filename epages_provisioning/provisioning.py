@@ -125,6 +125,11 @@ class ShopConfigService(BaseProvisioningService):
         """ Get info about all shops """
         return self.service2.getAllInfo()
 
+    def get_createshop_obj(self, data={}):
+        """ createshop obj
+        use this when calling create """
+        return self.client.get_type('ns0:TCreateShop')(**data)
+
     def get_info(self, shop):
         """ get information about one shop
 
@@ -147,6 +152,20 @@ class ShopConfigService(BaseProvisioningService):
 
         return self.service2.exists(shop)
 
+    def create(self, shop):
+        """ create new shop
+
+        shop = sc.get_createshop_obj()
+        shop.Alias = "Test"
+        shop.ShopType = "MinDemo"
+        sc.create(shop)
+        """
+        if not isinstance(shop, type(self.get_createshop_obj())):
+            raise TypeError(
+                "Get shop from get_createshop_obj and call with that")
+
+        return self.service2.create(shop)
+
     def delete(self, shop):
         """ delete a shop
 
@@ -167,7 +186,7 @@ class ShopConfigService(BaseProvisioningService):
             raise TypeError(
                 "Get shop from get_shopref_obj and call with that")
 
-        return self.service2.delete_shopref(shop)
+        return self.service2.deleteShopRef(shop)
 
 
 class SimpleProvisioningService(BaseProvisioningService):
