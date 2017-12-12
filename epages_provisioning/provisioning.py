@@ -135,6 +135,10 @@ class ShopConfigService(BaseProvisioningService):
         use this when calling create """
         return self.client.get_type('ns0:TUpdateShop')(**data)
 
+    def get_secondarydomains_obj(self, domains=[]):
+        """ get secondarydomains obj, used with set_secondary_domains """
+        return self.client.get_type('ns0:TSecondaryDomains')(domains)
+
     def get_info(self, shop):
         """ get information about one shop
 
@@ -172,11 +176,35 @@ class ShopConfigService(BaseProvisioningService):
         return self.service2.create(shop)
 
     def update(self, shop):
+        """ update shop
+
+        shop = sc.get_updateshop_obj()
+        shop.Alias = "Test"
+        shop.IsTrial = False
+        sc.update(shop)
+        """
         if not isinstance(shop, type(self.get_updateshop_obj())):
             raise TypeError(
                 "Get shop from get_updateshop_obj and call with that")
 
         return self.service2.update(shop)
+
+    def set_secondary_domains(self, shop, domains):
+        """ set secondary domains for the shop
+
+        shopref = sc.get_shopref_obj()
+        shopref.Alias = 'DemoShop'
+        domains = sc.get_secondarydomains_obj(['test.fi', 'test2.fi'])
+        sc.set_secondary_domains(shopref, domains)
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+        if not isinstance(domains, type(self.get_secondarydomains_obj())):
+            raise TypeError(
+                "Get shop from get_secondarydomains_obj and call with that")
+
+        return self.service2.setSecondaryDomains(shop, domains)
 
     def delete(self, shop):
         """ delete a shop

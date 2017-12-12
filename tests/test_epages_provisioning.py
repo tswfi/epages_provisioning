@@ -95,12 +95,18 @@ class TestShopConfiguration(unittest.TestCase):
         shop.IsTrial = False
         self.assertIsNone(self._sc.update(shop))
 
-    def test_050_delete(self):
+    def test_050_set_secondary_domains(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        domains = self._sc.get_secondarydomains_obj(['test1.fi', 'test2.fi'])
+        self.assertTrue(self._sc.set_secondary_domains(shopref, domains))
+
+    def test_900_delete(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete(shopref))
 
-    def test_060_deleteref(self):
+    def test_910_deleteref(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete_shopref(shopref))
