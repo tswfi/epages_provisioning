@@ -89,12 +89,18 @@ class TestShopConfiguration(unittest.TestCase):
         infoshop.Alias = self._shopalias_min
         self.assertTrue(self._sc.get_info(infoshop))
 
-    def test_040_delete(self):
+    def test_040_update(self):
+        shop = self._sc.get_updateshop_obj()
+        shop.Alias = self._shopalias_min
+        shop.IsTrial = False
+        self.assertIsNone(self._sc.update(shop))
+
+    def test_050_delete(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete(shopref))
 
-    def test_050_deleteref(self):
+    def test_060_deleteref(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete_shopref(shopref))

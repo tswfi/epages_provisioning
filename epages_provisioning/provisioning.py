@@ -130,6 +130,11 @@ class ShopConfigService(BaseProvisioningService):
         use this when calling create """
         return self.client.get_type('ns0:TCreateShop')(**data)
 
+    def get_updateshop_obj(self, data={}):
+        """ createshop obj
+        use this when calling create """
+        return self.client.get_type('ns0:TUpdateShop')(**data)
+
     def get_info(self, shop):
         """ get information about one shop
 
@@ -165,6 +170,13 @@ class ShopConfigService(BaseProvisioningService):
                 "Get shop from get_createshop_obj and call with that")
 
         return self.service2.create(shop)
+
+    def update(self, shop):
+        if not isinstance(shop, type(self.get_updateshop_obj())):
+            raise TypeError(
+                "Get shop from get_updateshop_obj and call with that")
+
+        return self.service2.update(shop)
 
     def delete(self, shop):
         """ delete a shop
