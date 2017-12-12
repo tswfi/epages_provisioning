@@ -69,12 +69,12 @@ class TestShopConfiguration(unittest.TestCase):
 
     def test_000_get_all_info(self):
         """ get info of all shops for this provider """
-        self.assertTrue(self._sp.all_info())
+        self.assertTrue(self._sp.get_all_info())
 
     def test_010_getinfo(self):
         infotype = self._sp.client.get_type('ns0:TInfoShop_Input')
         infoshop = infotype()
-        infoshop.Alias="DemoShop"
+        infoshop.Alias = "DemoShop"
         self.assertTrue(self._sp.service2.getInfo(infoshop))
 
 

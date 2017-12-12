@@ -93,7 +93,7 @@ class ShopConfigService(BaseProvisioningService):
                  provider="",
                  username="",
                  password="",
-                 version="11"):  # TODO: 12 after ePages fixes getAllInfo
+                 version="11"):  # TODO: 12 after ePages fixes AD-8535
         super(ShopConfigService, self).__init__(
             server=server,
             provider=provider,
@@ -113,8 +113,8 @@ class ShopConfigService(BaseProvisioningService):
         print(wsdlurl)
         return wsdlurl
 
-    def all_info(self):
-        """ it seems that the ePages service is broken. ePages bug: AD-8535 """
+    def get_all_info(self):
+        """ Get info about all shops """
         return self.service2.getAllInfo()
 
 
