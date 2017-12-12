@@ -11,7 +11,7 @@ Create shop
 
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
-        endpoint = "https://example.com/epages/Site.soap",
+        endpoint = "https://example.com/",
         provider = "Distributor",
         username = "admin",
         password = "admin",
@@ -31,7 +31,7 @@ Get shop info
 
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
-        endpoint = "https://example.com/epages/Site.soap",
+        endpoint = "https://example.com/",
         provider = "Distributor",
         username = "admin",
         password = "admin",

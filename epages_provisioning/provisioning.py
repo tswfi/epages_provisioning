@@ -21,14 +21,184 @@ logger = logging.getLogger(__name__)
 class BaseProvisioningService(object):
     """
     Base for provisioning services
-    """
 
-    def __init__(self, endpoint="", provider="", username="", password=""):
+    :param endpoint: server to use e.g. https://example.com/
+    :param provider: provider name
+    :param username: username
+    :param password: password
+    :param version: wsdl version number
+    """
+    def __init__(
+            self,
+            server="",
+            provider="",
+            username="",
+            password="",
+            version=""):
+
+        for key, value in locals().items():
+            if value is "":
+                raise ValueError('Argument %s required', key)
+
         super(BaseProvisioningService, self).__init__()
-        self.endpoint = endpoint
+
+        self.server = server
+
         self.provider = provider
         self.username = username
         self.password = password
+        self.version = version
+
+        self.endpoint = self._build_endpoint_from_server()
+        self.wsdl = self._build_wsdl_url_from_endpoint()
+        self.userpath = self._build_full_username()
+
+        # initialize our client using basic auth and with the wsdl file
+        session = Session()
+        session.auth = HTTPBasicAuth(self.userpath, self.password)
+        client = Client(
+            wsdl=self.wsdl,
+            strict=False,  # ePages wsdl files are full of errors...
+            transport=Transport(session=session)
+        )
+        self.client = client
+
+        # figure out our binding name TODO: There must be a better way
+        qname = str(client.service._binding.name)
+        # and create new service with the name pointing to our endpoint
+        self.service2 = client.create_service(qname, self.endpoint)
+        logger.debug('Initialized new client: %s', self.client)
+
+    def _build_endpoint_from_server(self):
+        """ Build endpoint url from server """
+        return "{}/epages/Site.soap".format(self.server)
+
+    def _build_wsdl_url_from_endpoint(self):
+        """ you need to implement this method in subclasses, each service has
+        different wsdl file locations """
+        raise NotImplementedError
+
+    def _build_full_username(self):
+        """ build the username as a path """
+        return "/Providers/{}/Users/{}".format(self.provider, self.username)
+
+
+class ShopConfigService(BaseProvisioningService):
+    """
+    ShopConfig service, handles more than simple provisioning service
+    """
+
+    def __init__(self,
+                 server="",
+                 provider="",
+                 username="",
+                 password="",
+                 version="11"):  # TODO: 12 after ePages fixes AD-8535
+        super(ShopConfigService, self).__init__(
+            server=server,
+            provider=provider,
+            username=username,
+            password=password,
+            version=version,
+        )
+
+    def _build_wsdl_url_from_endpoint(self):
+        """ Builds url to the wsdl from endpoint and version number """
+        parsed = urlparse(self.endpoint)
+        wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/'\
+                  'ShopConfigService{version}.wsdl'.format(
+                      uri=parsed, version=self.version
+                  )
+        logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
+        return wsdlurl
+
+    def get_infoshop_obj(self, data={}):
+        """ infoshop object, used with get_info """
+        return self.client.get_type('ns0:TInfoShop_Input')(**data)
+
+    def get_shopref_obj(self, data={}):
+        """ returns a shopref object
+        use this when calling exists, delete etc. """
+        return self.client.get_type('ns0:TShopRef')(**data)
+
+    def get_all_info(self):
+        """ Get info about all shops """
+        return self.service2.getAllInfo()
+
+    def get_createshop_obj(self, data={}):
+        """ createshop obj
+        use this when calling create """
+        return self.client.get_type('ns0:TCreateShop')(**data)
+
+    def get_updateshop_obj(self, data={}):
+        """ createshop obj
+        use this when calling create """
+        return self.client.get_type('ns0:TUpdateShop')(**data)
+
+    def get_info(self, shop):
+        """ get information about one shop
+
+        sc.get_info(sc.get_infoshop_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_infoshop_obj())):
+            raise TypeError(
+                "Get shop from get_infoshop_obj and call with that")
+
+        return self.service2.getInfo(shop)
+
+    def exists(self, shop):
+        """ Check if a shop exists
+
+        sc.exists(sc.get_shopref_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        return self.service2.exists(shop)
+
+    def create(self, shop):
+        """ create new shop
+
+        shop = sc.get_createshop_obj()
+        shop.Alias = "Test"
+        shop.ShopType = "MinDemo"
+        sc.create(shop)
+        """
+        if not isinstance(shop, type(self.get_createshop_obj())):
+            raise TypeError(
+                "Get shop from get_createshop_obj and call with that")
+
+        return self.service2.create(shop)
+
+    def update(self, shop):
+        if not isinstance(shop, type(self.get_updateshop_obj())):
+            raise TypeError(
+                "Get shop from get_updateshop_obj and call with that")
+
+        return self.service2.update(shop)
+
+    def delete(self, shop):
+        """ delete a shop
+
+        sc.delete(sc.get_shopref_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        return self.service2.delete(shop)
+
+    def delete_shopref(self, shop):
+        """ delete a shop
+
+        sc.delete_shopref(sc.get_shopref_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        return self.service2.deleteShopRef(shop)
 
 
 class SimpleProvisioningService(BaseProvisioningService):
@@ -46,47 +216,20 @@ class SimpleProvisioningService(BaseProvisioningService):
     """
 
     def __init__(self,
-                 endpoint="",
+                 server="",
                  provider="",
                  username="",
                  password="",
                  version="6"):
         super(SimpleProvisioningService, self).__init__(
-            endpoint=endpoint,
+            server=server,
             provider=provider,
             username=username,
-            password=password
+            password=password,
+            version=version
         )
 
-        self.version = version
-        self.wsdl = self.__build_wsdl_url_from_endpoint()
-        self.userpath = self.__build_full_username()
-
-        # initialize our client using basic auth and with the wsdl file
-        session = Session()
-        session.auth = HTTPBasicAuth(self.userpath, self.password)
-        client = Client(
-            wsdl=self.wsdl,
-            strict=False,  # ePages wsdl files are full of errors...
-            transport=Transport(session=session)
-        )
-        self.client = client
-
-        # the wsdl always points to localhost, change to our endpoint instead
-
-        # figure out our binding name TODO: There must be a better way
-        qname = str(client.service._binding.name)
-        # and create new service with the name pointing to our endpoint
-        service2 = client.create_service(qname, endpoint)
-        self.service2 = service2
-
-        logger.debug('Initialized new client: %s', self.client)
-
-    def __build_full_username(self):
-        """ build the username as a path """
-        return "/Providers/{}/Users/{}".format(self.provider, self.username)
-
-    def __build_wsdl_url_from_endpoint(self):
+    def _build_wsdl_url_from_endpoint(self):
         """ Builds url to the wsdl from endpoint and version number """
         parsed = urlparse(self.endpoint)
         wsdlurl = '{uri.scheme}://{uri.netloc}/WebRoot/WSDL/'\

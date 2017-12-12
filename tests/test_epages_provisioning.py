@@ -7,26 +7,26 @@ import os
 import unittest
 from datetime import datetime
 
-# import logging
-# import http.client as http_client
-
 from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
 
-# activate full logging to see what is on the wire
-# http_client.HTTPConnection.debuglevel = 1
-# logging.basicConfig()
-# logging.getLogger().setLevel(logging.DEBUG)
-# requests_log = logging.getLogger("requests.packages.urllib3")
-# requests_log.setLevel(logging.DEBUG)
-# requests_log.propagate = True
+# import logging
+if(os.environ.get('EP_TRACE')):
+    import logging
+    import http.client as http_client
+    http_client.HTTPConnection.debuglevel = 1
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
 
 
-class TestSimpleProvisioning(unittest.TestCase):
+class TestShopConfiguration(unittest.TestCase):
     """ Tests for `epages_provisioning` package.
     All tests require that the environment variables:
 
-        EP_ENDPOINT
+        EP_SERVER
         EP_PROVIDER
         EP_USERNAME
         EP_PASSWORD
@@ -35,7 +35,7 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     For example:
 
-        export EP_ENDPOINT=http://example.com/epages/Site.soap
+        export EP_SERVER=http://example.com/
         export EP_PROVIDER=Distributor
         export EP_USERNAME=admin
         export EP_PASSWORD=admin
@@ -43,6 +43,96 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     These tests also assume that the ePages service is a default installation
     with default shoptypes etc.
+
+    Also if you want to see a full message trace say:
+
+        export EP_TRACE=1
+
+    and then run your tests
+
+    Warning: these will take a while to run.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        set up our client for the tests
+        """
+        cls._sc = provisioning.ShopConfigService(
+            server=os.environ['EP_SERVER'],
+            provider=os.environ['EP_PROVIDER'],
+            username=os.environ['EP_USERNAME'],
+            password=os.environ['EP_PASSWORD'],
+        )
+        # used as alias for these tests
+        cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
+        cls._shoptype = 'MinDemo'
+
+    def test_000_get_all_info(self):
+        """ get info of all shops for this provider """
+        self.assertTrue(self._sc.get_all_info())
+
+    def test_010_create_mindata(self):
+        shop = self._sc.get_createshop_obj()
+        shop.Alias = self._shopalias_min
+        shop.ShopAlias = self._shopalias_min
+        shop.ShopType = self._shoptype
+        self.assertTrue(self._sc.create(shop))
+
+    def test_020_exists(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        self.assertTrue(self._sc.exists(shopref))
+
+    def test_030_getinfo(self):
+        infoshop = self._sc.get_infoshop_obj()
+        infoshop.Alias = self._shopalias_min
+        self.assertTrue(self._sc.get_info(infoshop))
+
+    def test_040_update(self):
+        shop = self._sc.get_updateshop_obj()
+        shop.Alias = self._shopalias_min
+        shop.IsTrial = False
+        self.assertIsNone(self._sc.update(shop))
+
+    def test_050_delete(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        self.assertIsNone(self._sc.delete(shopref))
+
+    def test_060_deleteref(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = self._shopalias_min
+        self.assertIsNone(self._sc.delete_shopref(shopref))
+
+
+class TestSimpleProvisioning(unittest.TestCase):
+    """ Tests for `epages_provisioning` package.
+    All tests require that the environment variables:
+
+        EP_SERVER
+        EP_PROVIDER
+        EP_USERNAME
+        EP_PASSWORD
+
+    are set
+
+    For example:
+
+        export EP_SERVER=http://example.com/
+        export EP_PROVIDER=Distributor
+        export EP_USERNAME=admin
+        export EP_PASSWORD=admin
+        make test
+
+    These tests also assume that the ePages service is a default installation
+    with default shoptypes etc.
+
+    Also if you want to see a full message trace say:
+
+        export EP_TRACE=1
+
+    and then run your tests
 
     Warning: these will take a while to run.
     """
@@ -53,7 +143,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         set up our client for the tests
         """
         cls._sp = provisioning.SimpleProvisioningService(
-            endpoint=os.environ['EP_ENDPOINT'],
+            server=os.environ['EP_SERVER'],
             provider=os.environ['EP_PROVIDER'],
             username=os.environ['EP_USERNAME'],
             password=os.environ['EP_PASSWORD'],
@@ -64,6 +154,10 @@ class TestSimpleProvisioning(unittest.TestCase):
         cls._shopalias_min_tmp = 'test-{}-min_tmp'.format(cls._nowstr)
         cls._shopalias_add = 'test-{}-add'.format(cls._nowstr)
 
+        # this is probably the smallest shoptype for testing, others might be
+        # "EBiz5" or "eCMSFree"
+        cls._shoptype = "MinDemo"
+
     def test_000_create_mindata(self):
         """
         test creating new shop with minimal data
@@ -71,7 +165,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_min,
-                'ShopType': 'MinDemo',
+                'ShopType': self._shoptype,
             }
         )
         self.assertIsNone(self._sp.create(shop))
@@ -95,7 +189,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_add,
-                'ShopType': 'MinDemo',
+                'ShopType': self._shoptype,
                 'IsClosed': 1,
                 'IsTrialShop': 1,
                 'IsInternalTestShop': 1,
@@ -107,8 +201,8 @@ class TestSimpleProvisioning(unittest.TestCase):
                 'AdditionalAttributes': [
                     {
                         'Name': 'Channel',
-                            'Type': 'String',
-                            'Value': 'TestScript'
+                        'Type': 'String',
+                        'Value': 'TestScript'
                     },
                     {
                         'Name': 'Likeability',
