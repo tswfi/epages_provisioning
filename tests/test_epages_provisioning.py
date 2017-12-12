@@ -11,7 +11,7 @@ from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
 
 # import logging
-if(os.environ.get('TRACE')):
+if(os.environ.get('EP_TRACE')):
     import logging
     import http.client as http_client
     http_client.HTTPConnection.debuglevel = 1
@@ -44,6 +44,12 @@ class TestShopConfiguration(unittest.TestCase):
     These tests also assume that the ePages service is a default installation
     with default shoptypes etc.
 
+    Also if you want to see a full message trace say:
+
+        export EP_TRACE=1
+
+    and then run your tests
+
     Warning: these will take a while to run.
     """
     @classmethod
@@ -62,12 +68,10 @@ class TestShopConfiguration(unittest.TestCase):
         cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
 
     def test_000_get_all_info(self):
-        return
         """ get info of all shops for this provider """
         self.assertTrue(self._sp.all_info())
 
     def test_010_getinfo(self):
-        return
         infotype = self._sp.client.get_type('ns0:TInfoShop_Input')
         infoshop = infotype()
         infoshop.Alias="DemoShop"
@@ -95,6 +99,12 @@ class TestSimpleProvisioning(unittest.TestCase):
 
     These tests also assume that the ePages service is a default installation
     with default shoptypes etc.
+
+    Also if you want to see a full message trace say:
+
+        export EP_TRACE=1
+
+    and then run your tests
 
     Warning: these will take a while to run.
     """

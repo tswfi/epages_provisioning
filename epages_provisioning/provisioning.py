@@ -114,7 +114,7 @@ class ShopConfigService(BaseProvisioningService):
         return wsdlurl
 
     def all_info(self):
-        """ it seems that the ePages service is broken """
+        """ it seems that the ePages service is broken. ePages bug: AD-8535 """
         return self.service2.getAllInfo()
 
 
