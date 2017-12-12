@@ -112,31 +112,43 @@ class ShopConfigService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def get_infoshop_obj(self, data={}):
+    def get_infoshop_obj(self, data=None):
         """ infoshop object, used with get_info """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TInfoShop_Input')(**data)
 
-    def get_shopref_obj(self, data={}):
+    def get_shopref_obj(self, data=None):
         """ returns a shopref object
         use this when calling exists, delete etc. """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TShopRef')(**data)
 
     def get_all_info(self):
         """ Get info about all shops """
         return self.service2.getAllInfo()
 
-    def get_createshop_obj(self, data={}):
+    def get_createshop_obj(self, data=None):
         """ createshop obj
         use this when calling create """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TCreateShop')(**data)
 
-    def get_updateshop_obj(self, data={}):
+    def get_updateshop_obj(self, data=None):
         """ createshop obj
         use this when calling create """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TUpdateShop')(**data)
 
-    def get_secondarydomains_obj(self, domains=[]):
+    def get_secondarydomains_obj(self, domains):
         """ get secondarydomains obj, used with set_secondary_domains """
+        if not isinstance(domains, list):
+            raise TypeError(
+                "domains should be a list of domains"
+            )
         return self.client.get_type('ns0:TSecondaryDomains')(domains)
 
     def get_info(self, shop):
@@ -267,20 +279,28 @@ class SimpleProvisioningService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def get_createshop_obj(self, data={}):
+    def get_createshop_obj(self, data=None):
         """ get shop object for creation """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TCreateShop')(**data)
 
-    def get_shopref_obj(self, data={}):
+    def get_shopref_obj(self, data=None):
         """ get shop object for exists, getinfo and markfor deletion calls """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TShopRef')(**data)
 
-    def get_updateshop_obj(self, data={}):
+    def get_updateshop_obj(self, data=None):
         """ get shop object for update call """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TUpdateShop')(**data)
 
-    def get_rename_obj(self, data={}):
+    def get_rename_obj(self, data=None):
         """ get rename object """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TRename_Input')(**data)
 
     def create(self, shop):
