@@ -105,6 +105,7 @@ class TestShopConfiguration(unittest.TestCase):
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete_shopref(shopref))
 
+
 class TestSimpleProvisioning(unittest.TestCase):
     """ Tests for `epages_provisioning` package.
     All tests require that the environment variables:
