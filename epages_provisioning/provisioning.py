@@ -147,6 +147,17 @@ class ShopConfigService(BaseProvisioningService):
 
         return self.service2.exists(shop)
 
+    def delete(self, shop):
+        """ delete a shop
+
+        sc.delete(sc.get_shopref_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        return self.service2.delete(shop)
+
 
 class SimpleProvisioningService(BaseProvisioningService):
     """
