@@ -57,7 +57,7 @@ class TestShopConfiguration(unittest.TestCase):
         """
         set up our client for the tests
         """
-        cls._sp = provisioning.ShopConfigService(
+        cls._sc = provisioning.ShopConfigService(
             server=os.environ['EP_SERVER'],
             provider=os.environ['EP_PROVIDER'],
             username=os.environ['EP_USERNAME'],
@@ -69,13 +69,17 @@ class TestShopConfiguration(unittest.TestCase):
 
     def test_000_get_all_info(self):
         """ get info of all shops for this provider """
-        self.assertTrue(self._sp.get_all_info())
+        self.assertTrue(self._sc.get_all_info())
 
     def test_010_getinfo(self):
-        infotype = self._sp.client.get_type('ns0:TInfoShop_Input')
-        infoshop = infotype()
+        infoshop = self._sc.get_infoshop_obj()
         infoshop.Alias = "DemoShop"
-        self.assertTrue(self._sp.service2.getInfo(infoshop))
+        self.assertTrue(self._sc.get_info(infoshop))
+
+    def test_020_exists(self):
+        shopref = self._sc.get_shopref_obj()
+        shopref.Alias = "DemoShop"
+        self.assertTrue(self._sc.exists(shopref))
 
 
 class TestSimpleProvisioning(unittest.TestCase):

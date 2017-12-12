@@ -110,18 +110,42 @@ class ShopConfigService(BaseProvisioningService):
                       uri=parsed, version=self.version
                   )
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
-        print(wsdlurl)
         return wsdlurl
+
+    def get_infoshop_obj(self, data={}):
+        """ infoshop object, used with get_info """
+        return self.client.get_type('ns0:TInfoShop_Input')(**data)
+
+    def get_shopref_obj(self, data={}):
+        """ returns a shopref object
+        use this when calling exists, delete etc. """
+        return self.client.get_type('ns0:TShopRef')(**data)
 
     def get_all_info(self):
         """ Get info about all shops """
         return self.service2.getAllInfo()
 
+    def get_info(self, shop):
+        """ get information about one shop
 
-    def get_info(self):
-        self.client.get_type('ns1:TInfoShop_Input')
+        sc.get_info(sc.get_infoshop_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_infoshop_obj())):
+            raise TypeError(
+                "Get shop from get_infoshop_obj and call with that")
 
         return self.service2.getInfo(shop)
+
+    def exists(self, shop):
+        """ Check if a shop exists
+
+        sc.exists(sc.get_shopref_obj({'Alias': 'DemoShop'}))
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+
+        return self.service2.exists(shop)
 
 
 class SimpleProvisioningService(BaseProvisioningService):
