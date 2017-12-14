@@ -11,7 +11,7 @@ from zeep.exceptions import ValidationError
 from epages_provisioning import provisioning
 
 # import logging
-if(os.environ.get('EP_TRACE')):
+if os.environ.get('EP_TRACE', False):
     import logging
     import http.client as http_client
     http_client.HTTPConnection.debuglevel = 1
@@ -22,6 +22,16 @@ if(os.environ.get('EP_TRACE')):
     requests_log.propagate = True
 
 
+# check for our environment variables
+envcheck = unittest.skipUnless(
+    os.environ.get('EP_SERVER', False) and
+    os.environ.get('EP_PROVIDER', False) and
+    os.environ.get('EP_PASSWORD', False) and
+    os.environ.get('EP_USERNAME', False), 'Environment variables not set'
+)
+
+
+@envcheck
 class TestShopConfiguration(unittest.TestCase):
     """ Tests for `epages_provisioning` package.
     All tests require that the environment variables:
@@ -95,11 +105,12 @@ class TestShopConfiguration(unittest.TestCase):
         shop.IsTrial = False
         self.assertIsNone(self._sc.update(shop))
 
+    @unittest.skip("WIP")
     def test_050_set_secondary_domains(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         domains = self._sc.get_secondarydomains_obj(['test1.fi', 'test2.fi'])
-#        self.assertTrue(self._sc.set_secondary_domains(shopref, domains))
+        self.assertTrue(self._sc.set_secondary_domains(shopref, domains))
 
     def test_900_delete(self):
         shopref = self._sc.get_shopref_obj()
@@ -112,6 +123,7 @@ class TestShopConfiguration(unittest.TestCase):
         self.assertIsNone(self._sc.delete_shopref(shopref))
 
 
+@envcheck
 class TestSimpleProvisioning(unittest.TestCase):
     """ Tests for `epages_provisioning` package.
     All tests require that the environment variables:
@@ -191,6 +203,7 @@ class TestSimpleProvisioning(unittest.TestCase):
 
         self.assertEqual(e.exception.message, "Missing element ShopType")
 
+    @unittest.skip("WIP")
     def test_002_create_with_additional(self):
         shop = self._sp.get_createshop_obj(
             {
@@ -219,20 +232,14 @@ class TestSimpleProvisioning(unittest.TestCase):
             }
         )
         # TODO this fails, ePages does not understand the AdditionalAttributes
-#        self.assertIsNone(self._sp.create(shop))
-#        shop = self._sp.get_shopref_obj(
-#            {
-#                'Alias': self._shopalias_add,
-#            }
-#        )
-#        self.assertTrue(self._sp.get_info(shop))
+        self.assertIsNone(self._sp.create(shop))
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_add,
+            }
+        )
+        self.assertTrue(self._sp.get_info(shop))
         # TODO check that the additionalattributes are there
-#        self.assertDictContainsSubset(
-#            {
-#                'Alias': self._shopalias_min,
-#                'AdditionalAttributes'
-#            },
-#            info)
 
     def test_010_exists(self):
         """

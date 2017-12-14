@@ -212,7 +212,7 @@ class ShopConfigService(BaseProvisioningService):
         if not isinstance(shop, type(self.get_shopref_obj())):
             raise TypeError(
                 "Get shop from get_shopref_obj and call with that")
-        if not isinstance(domains, type(self.get_secondarydomains_obj())):
+        if not isinstance(domains, type(self.get_secondarydomains_obj([]))):
             raise TypeError(
                 "Get shop from get_secondarydomains_obj and call with that")
 
