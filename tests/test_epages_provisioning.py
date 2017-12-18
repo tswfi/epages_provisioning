@@ -83,6 +83,7 @@ class TestShopConfiguration(unittest.TestCase):
         self.assertTrue(self._sc.get_all_info())
 
     def test_010_create_mindata(self):
+        """ create shop with minimal data """
         shop = self._sc.get_createshop_obj()
         shop.Alias = self._shopalias_min
         shop.ShopAlias = self._shopalias_min
@@ -90,22 +91,27 @@ class TestShopConfiguration(unittest.TestCase):
         self.assertTrue(self._sc.create(shop))
 
     def test_020_exists(self):
+        """ check that our creation was succesfull by checking
+        that the shop exists """
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertTrue(self._sc.exists(shopref))
 
     def test_030_getinfo(self):
+        """ fetch all the information of our shop """
         infoshop = self._sc.get_infoshop_obj()
         infoshop.Alias = self._shopalias_min
         self.assertTrue(self._sc.get_info(infoshop))
 
     def test_040_update(self):
+        """ and update information in our shop """
         shop = self._sc.get_updateshop_obj()
         shop.Alias = self._shopalias_min
         shop.IsTrial = False
         self.assertIsNone(self._sc.update(shop))
 
     def test_050_set_secondary_domains(self):
+        """ set some secondary domains for the shop """
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         domains = self._sc.get_secondarydomains_obj([
@@ -115,11 +121,13 @@ class TestShopConfiguration(unittest.TestCase):
         self.assertIsNone(self._sc.set_secondary_domains(shopref, domains))
 
     def test_900_delete(self):
+        """ and delete our test shop """
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete(shopref))
 
     def test_910_deleteref(self):
+        """ and delete the shopref also """
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         self.assertIsNone(self._sc.delete_shopref(shopref))
@@ -206,6 +214,8 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertEqual(e.exception.message, "Missing element ShopType")
 
     def test_002_create_with_additional(self):
+        """ create shop with additional data, you can push any data
+        you want into the shop in the additionalattributes """
         shop = self._sp.get_createshop_obj(
             {
                 'Alias': self._shopalias_add,

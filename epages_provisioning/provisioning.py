@@ -15,7 +15,6 @@ from requests.auth import HTTPBasicAuth
 from zeep import Client
 from zeep.transports import Transport
 from zeep import Plugin
-from lxml import etree
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +35,23 @@ class ArrayFixer(Plugin):
         """
         secondarydomains = envelope.find(".//SecondaryDomains")
         if secondarydomains is not None:
-            logger.debug("Mangling our secondarydomains element, adding arraytype")
+            logger.debug("Mangling secondarydomains element, adding arraytype")
             length = len(secondarydomains)
-            secondarydomains.attrib["{http://schemas.xmlsoap.org/soap/encoding/}arrayType"] = "ns1:string[{}]".format(length)
+            secondarydomains.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns1:string[{}]".format(length)
 
             logger.debug("And removing xsitype from items")
             for item in secondarydomains.getchildren():
                 item.attrib.clear()
 
-
         additional = envelope.find(".//AdditionalAttributes")
         if additional is not None:
-            logger.debug("Mangling our secondarydomains element, adding arraytype")
+            logger.debug("Mangling secondarydomains element, adding arraytype")
             length = len(additional)
-            additional.attrib["{http://schemas.xmlsoap.org/soap/encoding/}arrayType"] = "ns1:anyType[{}]".format(length)
+            additional.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns1:anyType[{}]".format(length)
 
             logger.debug("And removing xsitype from items")
             for item in additional.getchildren():
