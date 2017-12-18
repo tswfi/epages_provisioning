@@ -14,8 +14,48 @@ from requests import Session
 from requests.auth import HTTPBasicAuth
 from zeep import Client
 from zeep.transports import Transport
+from zeep import Plugin
+from lxml import etree
 
 logger = logging.getLogger(__name__)
+
+
+class ArrayFixer(Plugin):
+    """ try to fix the soap arrays for Soap::Lite
+
+    see https://github.com/mvantellingen/python-zeep/issues/521
+    """
+
+    def ingress(self, envelope, http_headers, operation):
+        return envelope, http_headers
+
+    def egress(self, envelope, http_headers, operation, binding_options):
+        """ force array type to SecondaryDomains element
+
+        TODO: There must be a better way
+        """
+        secondarydomains = envelope.find(".//SecondaryDomains")
+        if secondarydomains is not None:
+            logger.debug("Mangling our secondarydomains element, adding arraytype")
+            length = len(secondarydomains)
+            secondarydomains.attrib["{http://schemas.xmlsoap.org/soap/encoding/}arrayType"] = "ns1:string[{}]".format(length)
+
+            logger.debug("And removing xsitype from items")
+            for item in secondarydomains.getchildren():
+                item.attrib.clear()
+
+
+        additional = envelope.find(".//AdditionalAttributes")
+        if additional is not None:
+            logger.debug("Mangling our secondarydomains element, adding arraytype")
+            length = len(additional)
+            additional.attrib["{http://schemas.xmlsoap.org/soap/encoding/}arrayType"] = "ns1:anyType[{}]".format(length)
+
+            logger.debug("And removing xsitype from items")
+            for item in additional.getchildren():
+                item.attrib.clear()
+
+        return envelope, http_headers
 
 
 class BaseProvisioningService(object):
@@ -27,6 +67,7 @@ class BaseProvisioningService(object):
     :param password: password
     :param version: wsdl version number, defaults to latest version available
     """
+
     def __init__(
             self,
             server="",
@@ -53,13 +94,17 @@ class BaseProvisioningService(object):
         self.wsdl = self._build_wsdl_url_from_endpoint()
         self.userpath = self._build_full_username()
 
+        # plugin for fixing the arrays
+        arrayfixer = ArrayFixer()
+
         # initialize our client using basic auth and with the wsdl file
         session = Session()
         session.auth = HTTPBasicAuth(self.userpath, self.password)
         client = Client(
             wsdl=self.wsdl,
             strict=False,  # ePages wsdl files are full of errors...
-            transport=Transport(session=session)
+            transport=Transport(session=session),
+            plugins=[arrayfixer]
         )
         self.client = client
 

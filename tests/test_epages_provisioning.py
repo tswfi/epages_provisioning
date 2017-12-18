@@ -105,12 +105,11 @@ class TestShopConfiguration(unittest.TestCase):
         shop.IsTrial = False
         self.assertIsNone(self._sc.update(shop))
 
-    @unittest.skip("WIP")
     def test_050_set_secondary_domains(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
         domains = self._sc.get_secondarydomains_obj(['test1.fi', 'test2.fi'])
-        self.assertTrue(self._sc.set_secondary_domains(shopref, domains))
+        self.assertIsNone(self._sc.set_secondary_domains(shopref, domains))
 
     def test_900_delete(self):
         shopref = self._sc.get_shopref_obj()
@@ -203,7 +202,6 @@ class TestSimpleProvisioning(unittest.TestCase):
 
         self.assertEqual(e.exception.message, "Missing element ShopType")
 
-    @unittest.skip("WIP")
     def test_002_create_with_additional(self):
         shop = self._sp.get_createshop_obj(
             {
@@ -231,15 +229,13 @@ class TestSimpleProvisioning(unittest.TestCase):
                 ],
             }
         )
-        # TODO this fails, ePages does not understand the AdditionalAttributes
         self.assertIsNone(self._sp.create(shop))
-        shop = self._sp.get_shopref_obj(
-            {
-                'Alias': self._shopalias_add,
-            }
-        )
-        self.assertTrue(self._sp.get_info(shop))
-        # TODO check that the additionalattributes are there
+#        shop = self._sp.get_shopref_obj(
+#            {
+#                'Alias': self._shopalias_add,
+#            }
+#        )
+#        self.assertTrue(self._sp.get_info(shop))
 
     def test_010_exists(self):
         """
@@ -337,10 +333,10 @@ class TestSimpleProvisioning(unittest.TestCase):
             }
         )
         self.assertIsNone(self._sp.mark_for_deletion(shop))
-        # TODO: add back after additional creation works
-#        shop = self._sp.get_shopref_obj(
-#            {
-#                'Alias': self._shopalias_add,
-#            }
-#        )
-#        self.assertIsNone(self._sp.mark_for_deletion(shop))
+
+        shop = self._sp.get_shopref_obj(
+            {
+                'Alias': self._shopalias_add,
+            }
+        )
+        self.assertIsNone(self._sp.mark_for_deletion(shop))
