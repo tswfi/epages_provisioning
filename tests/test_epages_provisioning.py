@@ -108,7 +108,10 @@ class TestShopConfiguration(unittest.TestCase):
     def test_050_set_secondary_domains(self):
         shopref = self._sc.get_shopref_obj()
         shopref.Alias = self._shopalias_min
-        domains = self._sc.get_secondarydomains_obj(['test1.fi', 'test2.fi'])
+        domains = self._sc.get_secondarydomains_obj([
+            self._shopalias_min+'-test1.fi',
+            self._shopalias_min+'-test2.fi'
+        ])
         self.assertIsNone(self._sc.set_secondary_domains(shopref, domains))
 
     def test_900_delete(self):
