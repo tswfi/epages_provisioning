@@ -42,6 +42,7 @@ class BaseProvisioningService(object):
         super(BaseProvisioningService, self).__init__()
 
         self.server = server
+        self._add_scheme_to_server()
 
         self.provider = provider
         self.username = username
@@ -69,6 +70,12 @@ class BaseProvisioningService(object):
         self.service2 = client.create_service(qname, self.endpoint)
         logger.debug('Initialized new client: %s', self.client)
 
+    def _add_scheme_to_server(self):
+        """ adds https:// to server if it is not there already """
+        parsed = urlparse(self.server)
+        if parsed.scheme == "":
+            self.server = "https://{}".format(self.server)
+
     def _build_endpoint_from_server(self):
         """ Build endpoint url from server """
         return "{}/epages/Site.soap".format(self.server)
@@ -79,7 +86,7 @@ class BaseProvisioningService(object):
         raise NotImplementedError
 
     def _build_full_username(self):
-        """ build the username as a path """
+        """ build the username as a ePages object path """
         return "/Providers/{}/Users/{}".format(self.provider, self.username)
 
 
