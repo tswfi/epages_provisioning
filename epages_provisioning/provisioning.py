@@ -19,20 +19,50 @@ from zeep import Plugin
 logger = logging.getLogger(__name__)
 
 
+class BooleanFixer(Plugin):
+    """ ePages does not like boolean values as being "false"
+
+    change them to 0
+
+    TODO: There must be a better way
+    """
+
+    elements = (
+        'IsClosed',
+        'IsClosedTemporarily',
+        'IsTrialShop',
+        'IsInternalTestShop',
+        'MarkedForDelete',
+        'IsInternalTestShop',
+        'HasSSLCertificate',
+    )
+
+    def ingress(self, envelope, http_headers, operation):
+        return envelope, http_headers
+
+    def egress(self, envelope, http_headers, operation, binding_options):
+
+        for elementkey in self.elements:
+            element = envelope.find(".//"+elementkey)
+            if element is not None and element.text == "false":
+                element.text = "0"
+
+        return envelope, http_headers
+
+
 class ArrayFixer(Plugin):
     """ try to fix the soap arrays for Soap::Lite
 
     see https://github.com/mvantellingen/python-zeep/issues/521
+
+    TODO: There must be a better way
     """
 
     def ingress(self, envelope, http_headers, operation):
         return envelope, http_headers
 
     def egress(self, envelope, http_headers, operation, binding_options):
-        """ force array type to SecondaryDomains element
-
-        TODO: There must be a better way
-        """
+        """ force array type to SecondaryDomains element """
         secondarydomains = envelope.find(".//SecondaryDomains")
         if secondarydomains is not None:
             logger.debug("Mangling secondarydomains element, adding arraytype")
@@ -98,6 +128,7 @@ class BaseProvisioningService(object):
 
         # plugin for fixing the arrays
         arrayfixer = ArrayFixer()
+        booleanfixer = BooleanFixer()
 
         # initialize our client using basic auth and with the wsdl file
         session = Session()
@@ -106,7 +137,7 @@ class BaseProvisioningService(object):
             wsdl=self.wsdl,
             strict=False,  # ePages wsdl files are full of errors...
             transport=Transport(session=session),
-            plugins=[arrayfixer]
+            plugins=[arrayfixer, booleanfixer]
         )
         self.client = client
 

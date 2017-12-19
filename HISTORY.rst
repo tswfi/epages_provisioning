@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.0 (unreleased)
+------------------
+
+* added "shop" class which is a wrapper over the services
+
 0.2.1 (2017-12-19)
 ------------------
 
