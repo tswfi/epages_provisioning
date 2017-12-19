@@ -14,20 +14,62 @@ from requests import Session
 from requests.auth import HTTPBasicAuth
 from zeep import Client
 from zeep.transports import Transport
+from zeep import Plugin
 
 logger = logging.getLogger(__name__)
 
 
-class BaseProvisioningService(object):
+class ArrayFixer(Plugin):
+    """ try to fix the soap arrays for Soap::Lite
+
+    see https://github.com/mvantellingen/python-zeep/issues/521
     """
-    Base for provisioning services
+
+    def ingress(self, envelope, http_headers, operation):
+        return envelope, http_headers
+
+    def egress(self, envelope, http_headers, operation, binding_options):
+        """ force array type to SecondaryDomains element
+
+        TODO: There must be a better way
+        """
+        secondarydomains = envelope.find(".//SecondaryDomains")
+        if secondarydomains is not None:
+            logger.debug("Mangling secondarydomains element, adding arraytype")
+            length = len(secondarydomains)
+            secondarydomains.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns1:string[{}]".format(length)
+
+            logger.debug("And removing xsitype from items")
+            for item in secondarydomains.getchildren():
+                item.attrib.clear()
+
+        additional = envelope.find(".//AdditionalAttributes")
+        if additional is not None:
+            logger.debug("Mangling secondarydomains element, adding arraytype")
+            length = len(additional)
+            additional.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns1:anyType[{}]".format(length)
+
+            logger.debug("And removing xsitype from items")
+            for item in additional.getchildren():
+                item.attrib.clear()
+
+        return envelope, http_headers
+
+
+class BaseProvisioningService(object):
+    """ Base for provisioning services
 
     :param endpoint: server to use e.g. https://example.com/
     :param provider: provider name
     :param username: username
     :param password: password
-    :param version: wsdl version number
+    :param version: wsdl version number, defaults to latest version available
     """
+
     def __init__(
             self,
             server="",
@@ -43,6 +85,7 @@ class BaseProvisioningService(object):
         super(BaseProvisioningService, self).__init__()
 
         self.server = server
+        self._add_scheme_to_server()
 
         self.provider = provider
         self.username = username
@@ -53,21 +96,32 @@ class BaseProvisioningService(object):
         self.wsdl = self._build_wsdl_url_from_endpoint()
         self.userpath = self._build_full_username()
 
+        # plugin for fixing the arrays
+        arrayfixer = ArrayFixer()
+
         # initialize our client using basic auth and with the wsdl file
         session = Session()
         session.auth = HTTPBasicAuth(self.userpath, self.password)
         client = Client(
             wsdl=self.wsdl,
             strict=False,  # ePages wsdl files are full of errors...
-            transport=Transport(session=session)
+            transport=Transport(session=session),
+            plugins=[arrayfixer]
         )
         self.client = client
 
-        # figure out our binding name TODO: There must be a better way
-        qname = str(client.service._binding.name)
+        # get the binding name, there is only one so this should be ok
+        qname = next(iter(client.wsdl.bindings))
+
         # and create new service with the name pointing to our endpoint
         self.service2 = client.create_service(qname, self.endpoint)
         logger.debug('Initialized new client: %s', self.client)
+
+    def _add_scheme_to_server(self):
+        """ adds https:// to server if it is not there already """
+        parsed = urlparse(self.server)
+        if parsed.scheme == "":
+            self.server = "https://{}".format(self.server)
 
     def _build_endpoint_from_server(self):
         """ Build endpoint url from server """
@@ -79,7 +133,7 @@ class BaseProvisioningService(object):
         raise NotImplementedError
 
     def _build_full_username(self):
-        """ build the username as a path """
+        """ build the username as a ePages object path """
         return "/Providers/{}/Users/{}".format(self.provider, self.username)
 
 
@@ -112,28 +166,44 @@ class ShopConfigService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def get_infoshop_obj(self, data={}):
+    def get_infoshop_obj(self, data=None):
         """ infoshop object, used with get_info """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TInfoShop_Input')(**data)
 
-    def get_shopref_obj(self, data={}):
+    def get_shopref_obj(self, data=None):
         """ returns a shopref object
         use this when calling exists, delete etc. """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TShopRef')(**data)
 
     def get_all_info(self):
         """ Get info about all shops """
         return self.service2.getAllInfo()
 
-    def get_createshop_obj(self, data={}):
+    def get_createshop_obj(self, data=None):
         """ createshop obj
         use this when calling create """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TCreateShop')(**data)
 
-    def get_updateshop_obj(self, data={}):
+    def get_updateshop_obj(self, data=None):
         """ createshop obj
         use this when calling create """
+        if data is None:
+            data = {}
         return self.client.get_type('ns0:TUpdateShop')(**data)
+
+    def get_secondarydomains_obj(self, domains):
+        """ get secondarydomains obj, used with set_secondary_domains """
+        if not isinstance(domains, list):
+            raise TypeError(
+                "domains should be a list of domains"
+            )
+        return self.client.get_type('ns0:TSecondaryDomains')(domains)
 
     def get_info(self, shop):
         """ get information about one shop
@@ -172,11 +242,35 @@ class ShopConfigService(BaseProvisioningService):
         return self.service2.create(shop)
 
     def update(self, shop):
+        """ update shop
+
+        shop = sc.get_updateshop_obj()
+        shop.Alias = "Test"
+        shop.IsTrial = False
+        sc.update(shop)
+        """
         if not isinstance(shop, type(self.get_updateshop_obj())):
             raise TypeError(
                 "Get shop from get_updateshop_obj and call with that")
 
         return self.service2.update(shop)
+
+    def set_secondary_domains(self, shop, domains):
+        """ set secondary domains for the shop
+
+        shopref = sc.get_shopref_obj()
+        shopref.Alias = 'DemoShop'
+        domains = sc.get_secondarydomains_obj(['test.fi', 'test2.fi'])
+        sc.set_secondary_domains(shopref, domains)
+        """
+        if not isinstance(shop, type(self.get_shopref_obj())):
+            raise TypeError(
+                "Get shop from get_shopref_obj and call with that")
+        if not isinstance(domains, type(self.get_secondarydomains_obj([]))):
+            raise TypeError(
+                "Get shop from get_secondarydomains_obj and call with that")
+
+        return self.service2.setSecondaryDomains(shop, domains)
 
     def delete(self, shop):
         """ delete a shop
@@ -202,9 +296,9 @@ class ShopConfigService(BaseProvisioningService):
 
 
 class SimpleProvisioningService(BaseProvisioningService):
-    """
-    Simple provisioning, handles creating updating and deleting shops in ePages
-    environment.
+    """ Simple provisioning
+
+    handles creating updating and deleting shops in ePages environment.
 
     By default uses the following wsdl file from ePages:
 
@@ -239,41 +333,32 @@ class SimpleProvisioningService(BaseProvisioningService):
         logger.debug('Built wsdl url from endpoint: %s', wsdlurl)
         return wsdlurl
 
-    def get_createshop_type(self):
-        """ get the create type """
-        return self.client.get_type('ns0:TCreateShop')
-
-    def get_createshop_obj(self, data={}):
+    def get_createshop_obj(self, data=None):
         """ get shop object for creation """
-        return self.get_createshop_type()(**data)
+        if data is None:
+            data = {}
+        return self.client.get_type('ns0:TCreateShop')(**data)
 
-    def get_shopref_type(self):
-        """ get shopref factory """
-        return self.client.get_type('ns0:TShopRef')
-
-    def get_shopref_obj(self, data={}):
+    def get_shopref_obj(self, data=None):
         """ get shop object for exists, getinfo and markfor deletion calls """
-        return self.get_shopref_type()(**data)
+        if data is None:
+            data = {}
+        return self.client.get_type('ns0:TShopRef')(**data)
 
-    def get_updateshop_type(self):
-        """ get updateshop factory """
-        return self.client.get_type('ns0:TUpdateShop')
-
-    def get_updateshop_obj(self, data={}):
+    def get_updateshop_obj(self, data=None):
         """ get shop object for update call """
-        return self.get_updateshop_type()(**data)
+        if data is None:
+            data = {}
+        return self.client.get_type('ns0:TUpdateShop')(**data)
 
-    def get_rename_type(self):
-        """ get rename type factory """
-        return self.client.get_type('ns0:TRename_Input')
-
-    def get_rename_obj(self, data={}):
+    def get_rename_obj(self, data=None):
         """ get rename object """
-        return self.get_rename_type()(**data)
+        if data is None:
+            data = {}
+        return self.client.get_type('ns0:TRename_Input')(**data)
 
     def create(self, shop):
-        """
-        Creates new shop
+        """ Creates new shop
 
         sp = provisioning.SimpleProvisioningService(...)
         shop = sp.factory_createshop_obj()
@@ -291,8 +376,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.create(shop)
 
     def exists(self, shop):
-        """
-        Check if shop exists
+        """ Check if shop exists
 
         shopref = sp.get_shopref_obj()
         shopref.Alias = "ExistingShop"
@@ -305,8 +389,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.exists(shop)
 
     def get_info(self, shop):
-        """
-        Get shop information
+        """ Get shop information
 
         shopref = sp.get_shopref_obj()
         shopref.Alias = "ExistingShop"
@@ -320,9 +403,9 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.getInfo(shop)
 
     def mark_for_deletion(self, shop):
-        """
-        Mark the shop for deletion, it will be deleted by ePages after some
-        time (default 30 days)
+        """ Mark the shop for deletion
+
+        The shop will be deleted by ePages after some time (default 30 days)
 
         Does a extra exists call before marking for deletion because
         ePages service always returns None for this call
@@ -343,8 +426,7 @@ class SimpleProvisioningService(BaseProvisioningService):
             return False
 
     def rename(self, shop):
-        """
-        Rename shop
+        """ Rename shop
 
         Warning: this might change some urls in the shop and confuse
         search engines etc.
@@ -363,8 +445,7 @@ class SimpleProvisioningService(BaseProvisioningService):
         return self.service2.rename(shop)
 
     def update(self, shop):
-        """
-        Update shop information.
+        """ Update shop information.
 
         updateshop = sp.get_updateshop_obj()
         updateshop.Alias = "ExistingAlias"

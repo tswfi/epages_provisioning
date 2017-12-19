@@ -11,7 +11,7 @@ Create shop
 
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
-        endpoint = "https://example.com/",
+        server = "example.com",
         provider = "Distributor",
         username = "admin",
         password = "admin",
@@ -31,7 +31,7 @@ Get shop info
 
     from epages_provisioning import provisioning
     sp = provisioning.SimpleProvisioningService(
-        endpoint = "https://example.com/",
+        server = "example.com",
         provider = "Distributor",
         username = "admin",
         password = "admin",
@@ -41,5 +41,5 @@ Get shop info
             'Alias': 'TestShop1',
         }
     )
-    shopinfo = sp.getinfo(shop)
+    shopinfo = sp.get_info(shop)
 
