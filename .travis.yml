@@ -24,3 +24,6 @@ deploy:
     tags: true
     repo: tswfi/epages_provisioning
     python: 2.7
+
+after_success:
+  - coveralls
