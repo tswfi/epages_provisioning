@@ -2,10 +2,10 @@
 History
 =======
 
-0.3.0 (unreleased)
+0.3.0 (2017-12-22)
 ------------------
 
-* added "shop" class which is a wrapper over the services
+* added "shop" class which is a pythonic wrapper over the shopconfigservice
 
 0.2.1 (2017-12-19)
 ------------------
