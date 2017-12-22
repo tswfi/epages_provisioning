@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.1 (unreleased)
+------------------
+
+* added coveralls to testsuite
+
 0.3.0 (2017-12-22)
 ------------------
 
