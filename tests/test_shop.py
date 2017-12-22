@@ -65,6 +65,7 @@ class TestShop(unittest.TestCase):
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._alias = 'test-{}-min'.format(cls._nowstr)
         cls._shoptype = 'MinDemo'
+        print("Using shopalias: {} for testing".format(cls._alias))
 
     def setUp(self):
         """ get a shop to play with """
@@ -75,7 +76,6 @@ class TestShop(unittest.TestCase):
 
     def test_010_create(self):
         """ set the shop type and create the shop """
-        print(self.s)
         self.s.ShopType = self._shoptype
         self.assertIsNone(self.s.create())
         self.assertEqual(self.s.Alias, self._alias)
@@ -83,3 +83,30 @@ class TestShop(unittest.TestCase):
         self.assertFalse(self.s.IsTrialShop)
         self.assertFalse(self.s.IsClosed)
         self.assertFalse(self.s.IsClosedTemporarily)
+
+    def test_020_update(self):
+        """ update shop attribute """
+        self.s.IsTrialShop = True
+        self.assertIsNone(self.s.apply())
+        self.assertTrue(self.s.IsTrialShop)
+
+    def test_030_secondarydomains(self):
+        """ assign extra domains to the shop """
+        domains = [
+            "test1"+self._alias+".com",
+            "test2"+self._alias+".com",
+            ]
+        self.s.SecondaryDomains = domains
+        self.assertIsNone(self.s.apply())
+
+        self.assertEqual(self.s.SecondaryDomains, domains)
+
+    def test_900_mark_deletion(self):
+        """ mark the shop for deletion """
+        self.assertIsNone(self.s.mark_for_delete())
+        self.assertTrue(self.s.MarkedForDelOn)
+
+    def test_999_delete(self):
+        """ delete the shop completely """
+        self.assertIsNone(self.s.delete(shopref=True))
+        self.assertFalse(self.s.exists)

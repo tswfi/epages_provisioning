@@ -145,8 +145,6 @@ class Shop(object):
         del(data['IsDeleted'])
         del(data['Database'])
 
-        print(data)
-
         data = {k: v for k, v in data.items() if v is not None}
 
         # remove empty arrays
@@ -157,8 +155,6 @@ class Shop(object):
             del(data['SecondaryDomains'])
 
         del(data['HasSSLCertificate'])
-
-        print(data)
 
         updateshopobj = self.sc.get_updateshop_obj(data)
 
