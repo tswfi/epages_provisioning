@@ -108,9 +108,10 @@ class BaseProvisioningService(object):
             password="",
             version=""):
 
-        for key, value in locals().items():
-            if value is "":
-                raise ValueError('Argument %s required', key)
+        # TODO: add checks
+#        for key, value in locals().items():
+#            if value is "":
+#                raise ValueError('Argument %s required', key)
 
         super(BaseProvisioningService, self).__init__()
 
