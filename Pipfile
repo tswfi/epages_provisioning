@@ -7,11 +7,11 @@ name = "pypi"
 
 [dev-packages]
 
-Sphinx = "*"
+sphinx = "*"
 ipython = "*"
 docutils = "*"
 sphinx-autobuild = "*"
-restructuredtext_lint = "*"
+restructuredtext-lint = "*"
 tox = "*"
 coverage = "*"
 twine = "*"
@@ -21,6 +21,7 @@ bumpversion = "*"
 [packages]
 
 zeep = "*"
+python-coveralls = "*"
 
 
 [requires]
