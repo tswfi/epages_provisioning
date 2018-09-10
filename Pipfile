@@ -24,6 +24,7 @@ bumpversion = "*"
 zeep = "*"
 python-coveralls = "*"
 ipython = "*"
+bumpversion = "*"
 
 
 [requires]
