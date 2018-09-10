@@ -12,9 +12,8 @@ except ImportError:
 
 from requests import Session
 from requests.auth import HTTPBasicAuth
-from zeep import Client
+from zeep import Client, Settings, Plugin
 from zeep.transports import Transport
-from zeep import Plugin
 
 logger = logging.getLogger(__name__)
 
@@ -109,9 +108,9 @@ class BaseProvisioningService(object):
             version=""):
 
         # TODO: add checks
-#        for key, value in locals().items():
-#            if value is "":
-#                raise ValueError('Argument %s required', key)
+        # for key, value in locals().items():
+        #     if value is "":
+        #         raise ValueError('Argument %s required', key)
 
         super(BaseProvisioningService, self).__init__()
 
@@ -134,9 +133,12 @@ class BaseProvisioningService(object):
         # initialize our client using basic auth and with the wsdl file
         session = Session()
         session.auth = HTTPBasicAuth(self.userpath, self.password)
+        settings = Settings(
+            strict=False,  # ePages wsdl files are full of errors...
+        )
         client = Client(
             wsdl=self.wsdl,
-            strict=False,  # ePages wsdl files are full of errors...
+            settings=settings,
             transport=Transport(session=session),
             plugins=[arrayfixer, booleanfixer]
         )
@@ -179,7 +181,7 @@ class ShopConfigService(BaseProvisioningService):
                  provider="",
                  username="",
                  password="",
-                 version="11"):  # TODO: 12 after ePages fixes AD-8535
+                 version="12"):
         super(ShopConfigService, self).__init__(
             server=server,
             provider=provider,
