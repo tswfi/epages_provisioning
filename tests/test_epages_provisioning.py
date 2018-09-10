@@ -88,7 +88,7 @@ class TestShopConfiguration(unittest.TestCase):
         shop.Alias = self._shopalias_min
         shop.ShopAlias = self._shopalias_min
         shop.ShopType = self._shoptype
-        self.assertTrue(self._sc.create(shop))
+        self.assertIsNone(self._sc.create(shop))
 
     def test_020_exists(self):
         """ check that our creation was succesfull by checking
@@ -285,7 +285,7 @@ class TestSimpleProvisioning(unittest.TestCase):
         self.assertDictContainsSubset(
             {
                 'Alias': self._shopalias_min,
-                'MerchantLogin': None,
+                'MerchantLogin': 'admin',
                 'IsClosed': False,
             },
             info
