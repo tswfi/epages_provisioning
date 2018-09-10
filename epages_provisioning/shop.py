@@ -39,6 +39,14 @@ class Shop(object):
         'MerchantLogin',
         'MerchantEMail',
         'SecondaryDomains',
+        'ShopAddress_FirstName',
+        'ShopAddress_LastName',
+        'ShopAddress_CountryID',
+        'ShopAddress_Street',
+        'ShopAddress_Zipcode',
+        'ShopAddress_City',
+        'ShopAddress_State',
+        'Name',
         'Attributes',
     )
 
