@@ -16,12 +16,14 @@ tox = "*"
 coverage = "*"
 twine = "*"
 bumpversion = "*"
+"flake8" = "*"
 
 
 [packages]
 
 zeep = "*"
 python-coveralls = "*"
+ipython = "*"
 
 
 [requires]
