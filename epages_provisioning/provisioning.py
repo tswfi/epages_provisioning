@@ -70,7 +70,6 @@ class ArrayFixer(Plugin):
             secondarydomains.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
             ] = "ns1:string[{}]".format(length)
-
             for item in secondarydomains.getchildren():
                 item.attrib.clear()
 
@@ -81,7 +80,6 @@ class ArrayFixer(Plugin):
             additional.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
             ] = "ns1:anyType[{}]".format(length)
-
             for item in additional.getchildren():
                 item.attrib.clear()
 

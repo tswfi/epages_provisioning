@@ -7,14 +7,17 @@ logger = logging.getLogger(__name__)
 
 
 class ShopError(Exception):
+    """ shop error """
     pass
 
 
 class ShopExistsError(ShopError):
+    """ already exists """
     pass
 
 
 class ShopDisappearedError(ShopError):
+    """ shop went away while we were talking with it """
     pass
 
 
@@ -60,7 +63,7 @@ class Shop(object):
         for key in self.shopkeys:
             setattr(self, key, None)
 
-        # set alias from parameters
+        # set Alias from parameters
         self.Alias = Alias
 
         # set shoptype to None
@@ -148,21 +151,20 @@ class Shop(object):
         data = self._to_dict()
 
         # read only attributes
-        del(data['Provider'])
-        del(data['MarkedForDelOn'])
-        del(data['IsDeleted'])
-        del(data['Database'])
+        del data['Provider']
+        del data['MarkedForDelOn']
+        del data['IsDeleted']
+        del data['Database']
 
         data = {k: v for k, v in data.items() if v is not None}
 
-        # remove empty arrays
+        # remove empty arrays. Note: pylint will complain about this
+        # but zeep will complain even more :)
         if len(data['Attributes']) == 0:
-            del(data['Attributes'])
+            del data['Attributes']
 
         if len(data['SecondaryDomains']) == 0:
-            del(data['SecondaryDomains'])
-
-        del(data['HasSSLCertificate'])
+            del data['SecondaryDomains']
 
         updateshopobj = self.sc.get_updateshop_obj(data)
 

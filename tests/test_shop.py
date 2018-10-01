@@ -72,6 +72,7 @@ class TestShop(unittest.TestCase):
         self.s = Shop(Alias=self._alias, provisioning=self._sc)
 
     def test_001_start(self):
+        """ sanity check """
         self.assertTrue(self.s)
 
     def test_010_create(self):
