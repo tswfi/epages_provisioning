@@ -54,7 +54,7 @@ class ArrayFixer(Plugin):
 
     see https://github.com/mvantellingen/python-zeep/issues/521
 
-    TODO: There must be a better way
+    TODO: There must be a better way. yeah, this needs a rewrite...
     """
 
     def ingress(self, envelope, http_headers, operation):
@@ -63,6 +63,11 @@ class ArrayFixer(Plugin):
     def egress(self, envelope, http_headers, operation, binding_options):
         """ force array type to SecondaryDomains, AdditionalAttributes
         Attributes and Languages elements. And remove xsitype from items """
+
+        # for future reference on how to look inside the envelope
+        # from xml.etree import ElementTree
+        # print(ElementTree.tostring(envelope, encoding='utf8', method='xml'))
+
         secondarydomains = envelope.find(".//SecondaryDomains")
         if secondarydomains is not None:
             logger.debug("Mangling SecondaryDomains element, to arraytype")
@@ -83,15 +88,28 @@ class ArrayFixer(Plugin):
             for item in additional.getchildren():
                 item.attrib.clear()
 
+        # getinfo and update want different types...
         attributes = envelope.find(".//Attributes")
         if attributes is not None:
-            logger.debug("Mangling Attributes element, to arraytype")
-            length = len(attributes)
-            attributes.attrib[
-                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-            ] = "ns1:string[{}]".format(length)
-            for item in attributes.getchildren():
-                item.attrib.clear()
+            # if TAttribute elements exists the attributes is probably
+            # for update not for get...
+            action = envelope.find(".//TAttribute")
+            if action is not None:
+                logger.debug("Mangling Attributes element, to arraytype")
+                length = len(attributes)
+                attributes.attrib[
+                    "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+                ] = "ns1:Tattribute[{}]".format(length)
+                for item in attributes.getchildren():
+                    item.attrib.clear()
+            else:
+                logger.debug("Mangling Attributes element, to arraytype")
+                length = len(attributes)
+                attributes.attrib[
+                    "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+                ] = "ns1:string[{}]".format(length)
+                for item in attributes.getchildren():
+                    item.attrib.clear()
 
         languages = envelope.find(".//Languages")
         if languages is not None:
@@ -242,11 +260,18 @@ class ShopConfigService(BaseProvisioningService):
         return self.client.get_type('ns0:TCreateShop')(**data)
 
     def get_updateshop_obj(self, data=None):
-        """ createshop obj
-        use this when calling create """
+        """ updateshop obj
+        use this when calling update """
         if data is None:
             data = {}
         return self.client.get_type('ns0:TUpdateShop')(**data)
+
+    def get_attribute_obj(self, data=None):
+        """ attribute obj
+        use this with extra attributes setting """
+        if data is None:
+            data = {}
+        return self.client.get_type('ns1:TAttribute')(**data)
 
     def get_secondarydomains_obj(self, domains):
         """ get secondarydomains obj, used with set_secondary_domains """

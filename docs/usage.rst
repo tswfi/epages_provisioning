@@ -45,6 +45,8 @@ Create new shop
     # get one attribute from shop (particulary useful if you can also extend
     # the ePages end, for example add attribute SSO_URL to shop ;)
     shop.get_shop_attribute('CreationDate')
+    # or set a attribute
+    shop.set_shop_attribute('GrantServiceAccessUntil', '2100-01-01')
 
 Mark the shop for deletion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

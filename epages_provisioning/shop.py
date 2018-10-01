@@ -172,19 +172,38 @@ class Shop(object):
 
         self.refresh()
 
-    def get_shop_attribute(self, attribute, language=None):
+    def get_shop_attribute(self, attributename, language=None):
         """ get one attribute value from the shop, supports only
             string attributes, will fetch the value realtime """
         if language is None:
             language = 'en'
         infoshopobj = self.sc.get_infoshop_obj({
             'Alias': self.Alias,
-            'Attributes': [attribute],
+            'Attributes': [attributename],
             'Languages': [language]
             })
         data = self.sc.get_info(infoshopobj)
 
         return data['Attributes'][0].Value
+
+    def set_shop_attribute(self,
+                           attributename,
+                           value=None,
+                           localized_values=None):
+        """ set one attribute value from the shop, supports only
+            string attributes, will update immediately
+            localized_values need to be value, language pairs """
+        attributeobj = self.sc.get_attribute_obj()
+        attributeobj.Name = attributename
+        if value:
+            attributeobj.Value = value
+        if localized_values:
+            attributeobj.LocalizedValues = localized_values
+        updateshopobj = self.sc.get_updateshop_obj({
+            'Alias': self.Alias,
+            'Attributes': [attributeobj],
+            })
+        return self.sc.update(updateshopobj)
 
     def reset_merchant_pass(self, newpass):
         """ reset the merchant password
