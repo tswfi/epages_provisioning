@@ -61,28 +61,27 @@ class ArrayFixer(Plugin):
         return envelope, http_headers
 
     def egress(self, envelope, http_headers, operation, binding_options):
-        """ force array type to SecondaryDomains element """
+        """ force array type to SecondaryDomains, AdditionalAttributes
+        Attributes and Languages elements. And remove xsitype from items """
         secondarydomains = envelope.find(".//SecondaryDomains")
         if secondarydomains is not None:
-            logger.debug("Mangling secondarydomains element, adding arraytype")
+            logger.debug("Mangling SecondaryDomains element, to arraytype")
             length = len(secondarydomains)
             secondarydomains.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
             ] = "ns1:string[{}]".format(length)
 
-            logger.debug("And removing xsitype from items")
             for item in secondarydomains.getchildren():
                 item.attrib.clear()
 
         additional = envelope.find(".//AdditionalAttributes")
         if additional is not None:
-            logger.debug("Mangling secondarydomains element, adding arraytype")
+            logger.debug("Mangling AdditionalAttributes element, to arraytype")
             length = len(additional)
             additional.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
             ] = "ns1:anyType[{}]".format(length)
 
-            logger.debug("And removing xsitype from items")
             for item in additional.getchildren():
                 item.attrib.clear()
 
