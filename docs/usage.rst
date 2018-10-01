@@ -39,7 +39,7 @@ Create new shop
     # create the shop
     shop.create()
     # access the shop attributes, and change them as required
-    shop.IsTrialShop()
+    shop.IsTrialShop = False
     # apply the changes to the server
     shop.apply()
 
