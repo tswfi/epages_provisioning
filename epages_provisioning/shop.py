@@ -172,6 +172,20 @@ class Shop(object):
 
         self.refresh()
 
+    def get_shop_attribute(self, attribute, language=None):
+        """ get one attribute value from the shop, supports only
+            string attributes, will fetch the value realtime """
+        if language is None:
+            language = 'en'
+        infoshopobj = self.sc.get_infoshop_obj({
+            'Alias': self.Alias,
+            'Attributes': [attribute],
+            'Languages': [language]
+            })
+        data = self.sc.get_info(infoshopobj)
+
+        return data['Attributes'][0].Value
+
     def reset_merchant_pass(self, newpass):
         """ reset the merchant password
 

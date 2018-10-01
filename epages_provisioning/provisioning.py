@@ -83,6 +83,26 @@ class ArrayFixer(Plugin):
             for item in additional.getchildren():
                 item.attrib.clear()
 
+        attributes = envelope.find(".//Attributes")
+        if attributes is not None:
+            logger.debug("Mangling Attributes element, to arraytype")
+            length = len(attributes)
+            attributes.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns1:string[{}]".format(length)
+            for item in attributes.getchildren():
+                item.attrib.clear()
+
+        languages = envelope.find(".//Languages")
+        if languages is not None:
+            logger.debug("Mangling Languages element, to arraytype")
+            length = len(languages)
+            languages.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns2:string[{}]".format(length)
+            for item in languages.getchildren():
+                item.attrib.clear()
+
         return envelope, http_headers
 
 

@@ -42,6 +42,9 @@ Create new shop
     shop.IsTrialShop = False
     # apply the changes to the server
     shop.apply()
+    # get one attribute from shop (particulary useful if you can also extend
+    # the ePages end, for example add attribute SSO_URL to shop ;)
+    shop.get_shop_attribute('CreationDate')
 
 Mark the shop for deletion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

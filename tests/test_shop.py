@@ -102,6 +102,13 @@ class TestShop(unittest.TestCase):
 
         self.assertEqual(self.s.SecondaryDomains, domains)
 
+    def test_040_get_extra_attribute(self):
+        """ get one extra attribute from shop """
+        self.assertTrue(self.s.get_shop_attribute('Path'))
+        self.assertTrue(self.s.get_shop_attribute('CreationDate'))
+        with self.assertRaises(Exception) as e:
+            self.s.get_shop_attribute('NotExistingAttributeName')
+
     def test_900_mark_deletion(self):
         """ mark the shop for deletion """
         self.assertIsNone(self.s.mark_for_delete())
