@@ -25,7 +25,7 @@ Create new shop
 
     from epages_provisioning.provisioning import ShopConfigService
     from epages_provisioning.shop import Shop
-    sc = provisioning.ShopConfigService(
+    sc = ShopConfigService(
         server = "example.com",
         provider = "Distributor",
         username = "admin",
