@@ -6,6 +6,9 @@ __pycache__/
 # vscode
 .vscode
 
+# Pipenv lock file
+Pipfile.lock
+
 # C extensions
 *.so
 
