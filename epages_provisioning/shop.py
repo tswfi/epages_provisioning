@@ -7,14 +7,17 @@ logger = logging.getLogger(__name__)
 
 
 class ShopError(Exception):
+    """ shop error """
     pass
 
 
 class ShopExistsError(ShopError):
+    """ already exists """
     pass
 
 
 class ShopDisappearedError(ShopError):
+    """ shop went away while we were talking with it """
     pass
 
 
@@ -60,7 +63,7 @@ class Shop(object):
         for key in self.shopkeys:
             setattr(self, key, None)
 
-        # set alias from parameters
+        # set Alias from parameters
         self.Alias = Alias
 
         # set shoptype to None
@@ -148,27 +151,59 @@ class Shop(object):
         data = self._to_dict()
 
         # read only attributes
-        del(data['Provider'])
-        del(data['MarkedForDelOn'])
-        del(data['IsDeleted'])
-        del(data['Database'])
+        del data['Provider']
+        del data['MarkedForDelOn']
+        del data['IsDeleted']
+        del data['Database']
 
         data = {k: v for k, v in data.items() if v is not None}
 
-        # remove empty arrays
+        # remove empty arrays. Note: pylint will complain about this
+        # but zeep will complain even more :)
         if len(data['Attributes']) == 0:
-            del(data['Attributes'])
+            del data['Attributes']
 
         if len(data['SecondaryDomains']) == 0:
-            del(data['SecondaryDomains'])
-
-        del(data['HasSSLCertificate'])
+            del data['SecondaryDomains']
 
         updateshopobj = self.sc.get_updateshop_obj(data)
 
         self.sc.update(updateshopobj)
 
         self.refresh()
+
+    def get_shop_attribute(self, attributename, language=None):
+        """ get one attribute value from the shop, supports only
+            string attributes, will fetch the value realtime """
+        if language is None:
+            language = 'en'
+        infoshopobj = self.sc.get_infoshop_obj({
+            'Alias': self.Alias,
+            'Attributes': [attributename],
+            'Languages': [language]
+            })
+        data = self.sc.get_info(infoshopobj)
+
+        return data['Attributes'][0].Value
+
+    def set_shop_attribute(self,
+                           attributename,
+                           value=None,
+                           localized_values=None):
+        """ set one attribute value from the shop, supports only
+            string attributes, will update immediately
+            localized_values need to be value, language pairs """
+        attributeobj = self.sc.get_attribute_obj()
+        attributeobj.Name = attributename
+        if value:
+            attributeobj.Value = value
+        if localized_values:
+            attributeobj.LocalizedValues = localized_values
+        updateshopobj = self.sc.get_updateshop_obj({
+            'Alias': self.Alias,
+            'Attributes': [attributeobj],
+            })
+        return self.sc.update(updateshopobj)
 
     def reset_merchant_pass(self, newpass):
         """ reset the merchant password

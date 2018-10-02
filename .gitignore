@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# vscode
+.vscode
+
+# Pipenv lock file
+Pipfile.lock
+
 # C extensions
 *.so
 

@@ -72,6 +72,7 @@ class TestShop(unittest.TestCase):
         self.s = Shop(Alias=self._alias, provisioning=self._sc)
 
     def test_001_start(self):
+        """ sanity check """
         self.assertTrue(self.s)
 
     def test_010_create(self):
@@ -100,6 +101,20 @@ class TestShop(unittest.TestCase):
         self.assertIsNone(self.s.apply())
 
         self.assertEqual(self.s.SecondaryDomains, domains)
+
+    def test_040_set_extra_attribute(self):
+        self.assertIsNone(self.s.set_shop_attribute('GrantServiceAccessUntil',
+                                                    '2100-01-01'))
+
+    def test_050_get_extra_attribute(self):
+        """ get one extra attribute from shop """
+        self.assertTrue(self.s.get_shop_attribute('Path'))
+        self.assertTrue(self.s.get_shop_attribute('CreationDate'))
+        # this was set in a previous test
+        service_access = self.s.get_shop_attribute('GrantServiceAccessUntil')
+        self.assertEqual(service_access[0:10], '2100-01-01')
+        with self.assertRaises(Exception) as e:
+            self.s.get_shop_attribute('NotExistingAttributeName')
 
     def test_900_mark_deletion(self):
         """ mark the shop for deletion """

@@ -25,7 +25,7 @@ Create new shop
 
     from epages_provisioning.provisioning import ShopConfigService
     from epages_provisioning.shop import Shop
-    sc = provisioning.ShopConfigService(
+    sc = ShopConfigService(
         server = "example.com",
         provider = "Distributor",
         username = "admin",
@@ -39,9 +39,14 @@ Create new shop
     # create the shop
     shop.create()
     # access the shop attributes, and change them as required
-    shop.IsTrialShop()
+    shop.IsTrialShop = False
     # apply the changes to the server
     shop.apply()
+    # get one attribute from shop (particulary useful if you can also extend
+    # the ePages end, for example add attribute SSO_URL to shop ;)
+    shop.get_shop_attribute('CreationDate')
+    # or set a attribute
+    shop.set_shop_attribute('GrantServiceAccessUntil', '2100-01-01')
 
 Mark the shop for deletion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

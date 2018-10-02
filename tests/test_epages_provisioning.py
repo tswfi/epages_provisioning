@@ -243,12 +243,6 @@ class TestSimpleProvisioning(unittest.TestCase):
             }
         )
         self.assertIsNone(self._sp.create(shop))
-#        shop = self._sp.get_shopref_obj(
-#            {
-#                'Alias': self._shopalias_add,
-#            }
-#        )
-#        self.assertTrue(self._sp.get_info(shop))
 
     def test_010_exists(self):
         """
@@ -282,14 +276,9 @@ class TestSimpleProvisioning(unittest.TestCase):
 
         info = self._sp.get_info(shop)
         self.assertTrue(info)
-        self.assertDictContainsSubset(
-            {
-                'Alias': self._shopalias_min,
-                'MerchantLogin': 'admin',
-                'IsClosed': False,
-            },
-            info
-        )
+        self.assertEqual(info.Alias, self._shopalias_min)
+        self.assertEqual(info.MerchantLogin, 'admin')
+        self.assertEqual(info.IsClosed, False)
 
     def test_030_update(self):
         """
