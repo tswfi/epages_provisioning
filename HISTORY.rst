@@ -2,6 +2,14 @@
 History
 =======
 
+0.5.0 (2018-10-02)
+------------------
+
+* added two new methods get_shop_attribute and set_shop_attribute to shop class
+* fixed some documentation typos
+* fixed some code comments
+* updated dec requirements via pyup
+
 0.4.0 (2018-09-10)
 ------------------
 
