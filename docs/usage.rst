@@ -59,9 +59,9 @@ been marked for deletion for long enough and will delete them
     # this will call apply automatically
     # WARNING: this will also do a refresh from the server, you should call
     # apply before to prevent losing information in our shop object
-    shop.mark_for_deletion()
+    shop.mark_for_delete()
     # and reverse delete
-    shop.mark_for_deletion(mark=False)
+    shop.mark_for_delete(mark=False)
 
 Reset merchants password
 ~~~~~~~~~~~~~~~~~~~~~~~~
