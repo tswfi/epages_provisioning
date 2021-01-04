@@ -6,10 +6,6 @@ ePages provisioning
    :target: https://pypi.python.org/pypi/epages_provisioning
    :alt: PyPi page
 
-.. image:: https://img.shields.io/travis/tswfi/epages_provisioning.svg
-   :target: https://travis-ci.org/tswfi/epages_provisioning
-   :alt: Build status on travis
-
 .. image:: https://readthedocs.org/projects/epages-provisioning/badge/?version=latest
    :target: https://epages-provisioning.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
