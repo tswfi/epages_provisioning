@@ -2,6 +2,19 @@
 History
 =======
 
+1.0.2 (2021-01-04)
+------------------
+
+* remove last remrants of travis from docs
+* fix readme in built package
+* retest deploy process
+
+1.0.1 (2021-01-04)
+------------------
+
+* drop travis and switch to github actions for pypi publish
+* fix pypi and docs build
+
 1.0.0 (2021-01-04)
 ------------------
 

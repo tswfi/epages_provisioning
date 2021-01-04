@@ -124,9 +124,9 @@ When you are ready to release a new version follow these steps:
 
     $ bumpversion patch|minor|major
 
-4. push to master with tags to trigger travis deploy::
+4. push to master with tags to trigger deploy::
 
     $ git push --tags
     $ git push
 
-Travis will build the tag and when it is successfull will also deploy to pypi
+This will build the tag and when it is successfull will also deploy to pypi and testpypi
