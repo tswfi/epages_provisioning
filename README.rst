@@ -24,10 +24,6 @@ Python library for calling ePages provisioning services
 * Free software: MIT license
 * Documentation: https://epages-provisioning.readthedocs.io.
 
-.. include:: installation.rst
-
-.. include:: usage.rst
-
 Features
 --------
 
