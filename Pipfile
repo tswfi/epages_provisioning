@@ -1,13 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
-
-sphinx = "*"
 ipython = "*"
 docutils = "*"
 sphinx-autobuild = "*"
@@ -16,17 +12,12 @@ tox = "*"
 coverage = "*"
 twine = "*"
 bumpversion = "*"
-"flake8" = "*"
-
+flake8 = "*"
+Sphinx = "*"
+python-coveralls = "*"
 
 [packages]
-
-zeep = "*"
-python-coveralls = "*"
-ipython = "*"
-bumpversion = "*"
-
+zeep = "==4.1.0"
 
 [requires]
-
 python_version = "3.6"
