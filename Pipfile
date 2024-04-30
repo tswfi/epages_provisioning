@@ -17,7 +17,7 @@ Sphinx = "*"
 python-coveralls = "*"
 
 [packages]
-zeep = "==4.1.0"
+zeep = "==4.2.1"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"

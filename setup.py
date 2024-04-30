@@ -12,7 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'zeep>=4.0.0',
+    'zeep==4.2.1',
 ]
 
 setup_requirements = [
