@@ -2,6 +2,10 @@
 History
 =======
 
+1.1.1 (2024-04-30)
+------------------
+* bump version to get a proper release done after fixing publish workflow
+
 1.1.0 (2024-04-30)
 ------------------
 
