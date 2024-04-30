@@ -2,6 +2,14 @@
 History
 =======
 
+1.1.0 (2024-04-30)
+------------------
+
+* Sync all zeep requirements to 4.2.1
+* Fix `test_010_create_mindata` to send `WebServerScriptNamePart` which is required now
+* Allow defining shoptype as env variable for tests
+* up Pipenv python version to 3.8
+
 1.0.2 (2021-01-04)
 ------------------
 

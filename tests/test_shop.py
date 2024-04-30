@@ -46,6 +46,12 @@ class TestShop(unittest.TestCase):
 
         export EP_TRACE=1
 
+    And you can define the shoptype to use with
+
+        export EP_SHOPTYPE=MinDemo
+
+    MinDemo is the default value if not set
+
     and then run your tests
 
     Warning: these will take a while to run.
@@ -64,7 +70,7 @@ class TestShop(unittest.TestCase):
         # used as alias for these tests
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._alias = 'test-{}-min'.format(cls._nowstr)
-        cls._shoptype = 'MinDemo'
+        cls._shoptype = os.environ.get('EP_SHOPTYPE', 'MinDemo')
         print("Using shopalias: {} for testing".format(cls._alias))
 
     def setUp(self):

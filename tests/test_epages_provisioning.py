@@ -58,6 +58,12 @@ class TestShopConfiguration(unittest.TestCase):
 
         export EP_TRACE=1
 
+    And you can define the shoptype to use with
+
+        export EP_SHOPTYPE=MinDemo
+
+    MinDemo is the default value if not set
+
     and then run your tests
 
     Warning: these will take a while to run.
@@ -76,7 +82,7 @@ class TestShopConfiguration(unittest.TestCase):
         # used as alias for these tests
         cls._nowstr = datetime.now().strftime('%Y%m%d%H%M%S%f')
         cls._shopalias_min = 'test-{}-min'.format(cls._nowstr)
-        cls._shoptype = 'MinDemo'
+        cls._shoptype = os.environ.get('EP_SHOPTYPE', 'MinDemo')
 
     def test_000_get_all_info(self):
         """ get info of all shops for this provider """
@@ -87,6 +93,7 @@ class TestShopConfiguration(unittest.TestCase):
         shop = self._sc.get_createshop_obj()
         shop.Alias = self._shopalias_min
         shop.ShopAlias = self._shopalias_min
+        shop.WebServerScriptNamePart = self._shopalias_min
         shop.ShopType = self._shoptype
         self.assertIsNone(self._sc.create(shop))
 
@@ -184,7 +191,7 @@ class TestSimpleProvisioning(unittest.TestCase):
 
         # this is probably the smallest shoptype for testing, others might be
         # "EBiz5" or "eCMSFree"
-        cls._shoptype = "MinDemo"
+        cls._shoptype = os.environ.get('EP_SHOPTYPE', 'MinDemo')
 
     def test_000_create_mindata(self):
         """
