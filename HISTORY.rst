@@ -2,6 +2,10 @@
 History
 =======
 
+1.1.2 (2024-04-30)
+------------------
+* add the xml file to release..
+
 1.1.1 (2024-04-30)
 ------------------
 * bump version to get a proper release done after fixing publish workflow
