@@ -12,116 +12,11 @@ except ImportError:
 
 from requests import Session
 from requests.auth import HTTPBasicAuth
-from zeep import Client, Settings, Plugin
-from zeep.transports import Transport
+from zeep import Client, Settings
+
+from .zeep_utils import BooleanFixer, ArrayFixer, LocalSchemaTransport
 
 logger = logging.getLogger(__name__)
-
-
-class BooleanFixer(Plugin):
-    """ ePages does not like boolean values as being "false"
-
-    change them to 0
-
-    TODO: There must be a better way
-    """
-
-    elements = (
-        'IsClosed',
-        'IsClosedTemporarily',
-        'IsTrialShop',
-        'IsInternalTestShop',
-        'MarkedForDelete',
-        'IsInternalTestShop',
-        'HasSSLCertificate',
-    )
-
-    def ingress(self, envelope, http_headers, operation):
-        return envelope, http_headers
-
-    def egress(self, envelope, http_headers, operation, binding_options):
-
-        for elementkey in self.elements:
-            element = envelope.find(".//"+elementkey)
-            if element is not None and element.text == "false":
-                element.text = "0"
-
-        return envelope, http_headers
-
-
-class ArrayFixer(Plugin):
-    """ try to fix the soap arrays for Soap::Lite
-
-    see https://github.com/mvantellingen/python-zeep/issues/521
-
-    TODO: There must be a better way. yeah, this needs a rewrite...
-    """
-
-    def ingress(self, envelope, http_headers, operation):
-        return envelope, http_headers
-
-    def egress(self, envelope, http_headers, operation, binding_options):
-        """ force array type to SecondaryDomains, AdditionalAttributes
-        Attributes and Languages elements. And remove xsitype from items """
-
-        # for future reference on how to look inside the envelope
-        # from xml.etree import ElementTree
-        # print(ElementTree.tostring(envelope, encoding='utf8', method='xml'))
-
-        secondarydomains = envelope.find(".//SecondaryDomains")
-        if secondarydomains is not None:
-            logger.debug("Mangling SecondaryDomains element, to arraytype")
-            length = len(secondarydomains)
-            secondarydomains.attrib[
-                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-            ] = "ns1:string[{}]".format(length)
-            for item in secondarydomains.getchildren():
-                item.attrib.clear()
-
-        additional = envelope.find(".//AdditionalAttributes")
-        if additional is not None:
-            logger.debug("Mangling AdditionalAttributes element, to arraytype")
-            length = len(additional)
-            additional.attrib[
-                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-            ] = "ns1:anyType[{}]".format(length)
-            for item in additional.getchildren():
-                item.attrib.clear()
-
-        # getinfo and update want different types...
-        attributes = envelope.find(".//Attributes")
-        if attributes is not None:
-            # if TAttribute elements exists the attributes is probably
-            # for update not for get...
-            action = envelope.find(".//TAttribute")
-            if action is not None:
-                logger.debug("Mangling Attributes element, to arraytype")
-                length = len(attributes)
-                attributes.attrib[
-                    "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-                ] = "ns1:Tattribute[{}]".format(length)
-                for item in attributes.getchildren():
-                    item.attrib.clear()
-            else:
-                logger.debug("Mangling Attributes element, to arraytype")
-                length = len(attributes)
-                attributes.attrib[
-                    "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-                ] = "ns1:string[{}]".format(length)
-                for item in attributes.getchildren():
-                    item.attrib.clear()
-
-        languages = envelope.find(".//Languages")
-        if languages is not None:
-            logger.debug("Mangling Languages element, to arraytype")
-            length = len(languages)
-            languages.attrib[
-                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-            ] = "ns2:string[{}]".format(length)
-            for item in languages.getchildren():
-                item.attrib.clear()
-
-        return envelope, http_headers
 
 
 class BaseProvisioningService(object):
@@ -174,7 +69,7 @@ class BaseProvisioningService(object):
         client = Client(
             wsdl=self.wsdl,
             settings=settings,
-            transport=Transport(session=session),
+            transport=LocalSchemaTransport(session=session),
             plugins=[arrayfixer, booleanfixer]
         )
         self.client = client

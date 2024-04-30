@@ -9,6 +9,9 @@ History
 * Fix `test_010_create_mindata` to send `WebServerScriptNamePart` which is required now
 * Allow defining shoptype as env variable for tests
 * up Pipenv python version to 3.8
+* refactor zeep utils to own file
+* use local copy of soap-encodings as the server is not stable
+  * see: https://github.com/mvantellingen/python-zeep/issues/1417
 
 1.0.2 (2021-01-04)
 ------------------
