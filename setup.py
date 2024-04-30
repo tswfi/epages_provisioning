@@ -25,7 +25,7 @@ test_requirements = [
 
 setup(
     name='epages_provisioning',
-    version='1.0.2',
+    version='1.1.0',
     description="Python library for calling ePages provisioning services",
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/x-rst',
