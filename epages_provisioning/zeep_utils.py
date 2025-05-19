@@ -1,6 +1,7 @@
 import logging
 import os
 from urllib.parse import urlparse
+from lxml import etree
 
 from zeep import Plugin
 from zeep.transports import Transport
@@ -22,7 +23,7 @@ class LocalSchemaTransport(Transport):
         """Load the content from the given URL"""
         if not url:
             raise ValueError("No url given to load")
-
+        logger.error(f"Loading {url}")
         scheme = urlparse(url).scheme
         if scheme in ("http", "https", "file"):
 
@@ -30,6 +31,33 @@ class LocalSchemaTransport(Transport):
                 response = self.cache.get(url)
                 if response:
                     return bytes(response)
+
+            # fix feature namespaces
+            # TODO, maybe just do the same fix as the others, and fix the xml file
+            if url.endswith("FeaturePackService.wsdl"):
+                logger.error(f"Patching WSDL {url}")
+                parser = etree.XMLParser(ns_clean=True, recover=True)
+                content = super().load(url)
+                doc = etree.fromstring(content, parser=parser)
+
+                # Fix the import namespace in WSDL to match the XSD targetNamespace exactly
+                for imp in doc.xpath("//xsd:import", namespaces={'xsd': 'http://www.w3.org/2001/XMLSchema'}):
+                    imp.attrib['namespace'] = "urn://epages.de/WebService/FeaturePackTypes/2005/03"
+
+
+                return etree.tostring(doc)
+
+            elif url.endswith("FeaturePackTypes.xsd"):
+                logger.error(f"Patching XSD {url}")
+                parser = etree.XMLParser(ns_clean=True, recover=True)
+                content = super().load(url)
+                doc = etree.fromstring(content, parser=parser)
+
+                expected_ns = "urn://epages.de/WebService/FeaturePackTypes/2005/03"
+                current_ns = doc.attrib.get('targetNamespace', '')
+                if current_ns != expected_ns:
+                    doc.attrib['targetNamespace'] = expected_ns
+                return etree.tostring(doc)
 
             # this url was causing some issues (404 errors); it is now saved locally for fast retrieval when needed
             if url == 'http://schemas.xmlsoap.org/soap/encoding/':
