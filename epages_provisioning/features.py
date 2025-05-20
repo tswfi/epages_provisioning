@@ -21,7 +21,7 @@ class FeaturePackService:
         session.auth = HTTPBasicAuth(self.userpath, self.password)
 
         settings = Settings(
-            strict=False,  # ePages wsdl files are full of errors...
+            strict=True,  # For now, seems to work. But toggle back if something comes up again...
         )
         # Plugins instances
         arrayfixer = ArrayFixer()
@@ -46,11 +46,11 @@ class FeaturePackService:
 
     def list_feature_packs(self):
         getinfo_type = self.client.get_type("ns0:type_GetInfo_In")
-        getinfo = getinfo_type(['foobar']) # I have no idea what this parameter is. MinOcr 1...
+        getinfo = getinfo_type(['/Providers/Distributor/FeaturePacks/demo']) # I have no idea what this parameter is. MinOcr 1...
         attributenames_type = self.client.get_type("ns0:type_AttributeNames_In")
-        attributenames = attributenames_type(['Alias']) # I'm guessing this is what attributes we want to receive? IDK
+        attributenames = attributenames_type(['Alias', 'test']) # I'm guessing this is what attributes we want to receive? IDK
         language_code_type = self.client.get_type("ns0:type_LanguageCodes_In")
-        language_code = language_code_type(['en'])
+        language_code = language_code_type(['en', 'fi'])
         return self.service2.getInfo(getinfo, attributenames, language_code)
         # Now it sends the request, but cannot parse the response...
 

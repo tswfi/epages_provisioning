@@ -179,4 +179,14 @@ class ArrayFixer(Plugin):
             for item in languages.getchildren():
                 item.attrib.clear()
 
+        languages = envelope.find(".//LanguageCodes")
+        if languages is not None:
+            logger.debug("Mangling Language codes element, to arraytype")
+            length = len(languages)
+            languages.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns2:string[{}]".format(length)
+            for item in languages.getchildren():
+                item.attrib.clear()
+
         return envelope, http_headers
