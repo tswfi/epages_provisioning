@@ -23,7 +23,7 @@ class FeaturePackService:
         session.auth = HTTPBasicAuth(self.userpath, self.password)
 
         settings = Settings(
-            strict=True,  # For now, seems to work. But toggle back if something comes up again...
+            strict=False,
         )
         # Plugins instances
         arrayfixer = ArrayFixer()
@@ -52,7 +52,11 @@ class FeaturePackService:
         path = f"/Providers/{self.provider}/FeaturePacks/{feature}"
         getinfo = getinfo_type([path])
         attributenames_type = self.client.get_type("ns0:type_AttributeNames_In")
-        attributenames = attributenames_type(['Alias']) #
+
+        # Can fetch more attributes, that ePages doesn't return by default.
+        # By default it doesn't return the alias, so let's at least return that.
+        attributenames = attributenames_type(['Alias'])
+
         language_code_type = self.client.get_type("ns0:type_LanguageCodes_In")
         language_code = language_code_type(['en'])
         return self.service2.getInfo(getinfo, attributenames, language_code)
