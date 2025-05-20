@@ -19,6 +19,14 @@ class TestFeaturePackService(unittest.TestCase):
             username=os.environ['EP_USERNAME'],
             password=os.environ['EP_PASSWORD'],
         )
-        
-        feature_packs = fps.list_feature_packs()
-        print(feature_packs)
+
+
+        error = fps.getInfo('invalid'); # This returns an error, which is valid.
+        logger.debug(f"invalid feature response. feature pack not found: {error}")
+        assert error[0].Error.Message == 'Object with path /Providers/Distributor/FeaturePacks/invalid was not found.'
+
+        # But if you fetch a valid feature pack, it returns the information in invalid form...
+        #feature = fps.getInfo('demo') # so this needs to be fixes in ingress.
+
+        #logger.error(f"Feature: {feature}")
+        #print(feature)
