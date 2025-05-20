@@ -1,5 +1,5 @@
 import logging
-from zeep import Client
+from zeep import Client, Settings
 from zeep.transports import Transport
 from requests.auth import HTTPBasicAuth
 from requests import Session
@@ -8,7 +8,6 @@ from .zeep_utils import BooleanFixer, ArrayFixer, LocalSchemaTransport
 
 logger = logging.getLogger(__name__)
 
-
 class FeaturePackService:
     def __init__(self, server, provider, username, password):
         wsdl_url = f"{server}/WebRoot/WSDL/FeaturePackService.wsdl"
@@ -16,36 +15,42 @@ class FeaturePackService:
         self.username = username
         self.password = password
         self.userpath = self._build_full_username()
+        self.server = server
+        self.endpoint = self._build_endpoint_from_server()
         session = Session()
         session.auth = HTTPBasicAuth(self.userpath, self.password)
 
+        settings = Settings(
+            strict=False,  # ePages wsdl files are full of errors...
+        )
         # Plugins instances
         arrayfixer = ArrayFixer()
         booleanfixer = BooleanFixer()
 
         self.client = Client(
             wsdl=wsdl_url,
+            settings=settings,
             transport=LocalSchemaTransport(session=session),
             plugins=[arrayfixer, booleanfixer]
         )
+        qname = next(iter(self.client.wsdl.bindings))
+        logger.error(f"Binding: {qname}")
+        self.service2 = self.client.create_service(qname, self.endpoint)
+
+    def _build_endpoint_from_server(self):
+        """ Build endpoint url from server """
+        return "{}/epages/Site.soap".format(self.server)
 
     def _build_full_username(self):
         return f"/Providers/{self.provider}/Users/{self.username}"
 
     def list_feature_packs(self):
-        # todo remove this. just for logging
-        for service in self.client.wsdl.services.values():
-            for port in service.ports.values():
-                logger.error(f"Port: {port.name}")
-                logger.error("Operations:")
-                for op in port.binding._operations.values():
-                    logger.error(f" - {op.name}")
-                    logger.error(op.input)
-                    logger.error(op.input.signature())
-                    logger.error(op.input.body)
-                    logger.error(op.input.body.type)
-
-
-        # This needs some parameter... it's not working as is
-        return self.client.service.getInfo(self.provider)
+        getinfo_type = self.client.get_type("ns0:type_GetInfo_In")
+        getinfo = getinfo_type(['foobar']) # I have no idea what this parameter is. MinOcr 1...
+        attributenames_type = self.client.get_type("ns0:type_AttributeNames_In")
+        attributenames = attributenames_type(['Alias']) # I'm guessing this is what attributes we want to receive? IDK
+        language_code_type = self.client.get_type("ns0:type_LanguageCodes_In")
+        language_code = language_code_type(['en'])
+        return self.service2.getInfo(getinfo, attributenames, language_code)
+        # Now it sends the request, but cannot parse the response...
 

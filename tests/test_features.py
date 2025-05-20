@@ -20,6 +20,5 @@ class TestFeaturePackService(unittest.TestCase):
             password=os.environ['EP_PASSWORD'],
         )
         
-        # This will trigger the transport initialization inside FeaturePackService.__init__
         feature_packs = fps.list_feature_packs()
         print(feature_packs)

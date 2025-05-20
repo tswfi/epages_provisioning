@@ -33,7 +33,6 @@ class LocalSchemaTransport(Transport):
                     return bytes(response)
 
             # fix feature namespaces
-            # TODO, maybe just do the same fix as the others, and fix the xml file
             if url.endswith("FeaturePackService.wsdl"):
                 logger.error(f"Patching WSDL {url}")
                 parser = etree.XMLParser(ns_clean=True, recover=True)
