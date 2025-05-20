@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 class FeaturePackService:
     def __init__(self, server, provider, username, password):
         wsdl_url = f"{server}/WebRoot/WSDL/FeaturePackService.wsdl"
+        if not wsdl_url.startswith("http"):
+            wsdl_url = "https://" + wsdl_url
         self.provider = provider
         self.username = username
         self.password = password
@@ -34,7 +36,7 @@ class FeaturePackService:
             plugins=[arrayfixer, booleanfixer]
         )
         qname = next(iter(self.client.wsdl.bindings))
-        logger.error(f"Binding: {qname}")
+        logger.debug(f"Binding: {qname}")
         self.service2 = self.client.create_service(qname, self.endpoint)
 
     def _build_endpoint_from_server(self):

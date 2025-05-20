@@ -165,3 +165,23 @@ Create new shop
         }
     )
     sc.create(shop)
+
+
+Features
+~~~~~~~~
+
+.. code-block:: python
+
+    from epages_provisioning import features
+    feature_service = features.FeaturePackService(
+        server = "example.com",
+        provider = "Distributor",
+        username = "admin",
+        password = "admin",
+    )
+    feature_pack = feature_service.getInfo('RateCompass');
+    # TODO, IDK what this will actually even look like
+
+    non_existing_feature_pack = feature_service.getInfo('does_not_exist');
+    if(on_existing_feature_pack[0].Error.Message):
+         # TODO, error handling... Maybe throw exception or just return undef. IDK.
