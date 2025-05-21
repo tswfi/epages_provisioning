@@ -202,10 +202,11 @@ class ArrayFixer(Plugin):
         feature_packs = envelope.find(".//FeaturePacks")
         if feature_packs is not None:
             logger.debug("Mangling GetInfo path element, to arraytype")
+            namespace = 'ns2' if operation.name == 'applyToShop' else 'ns3'
             length = len(feature_packs)
             feature_packs.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
-            ] = "ns3:string[{}]".format(length)
+            ] = f"{namespace}:string[{length}]"
             for item in feature_packs.getchildren():
                 item.attrib.clear()
 

@@ -48,7 +48,7 @@ class FeaturePackService:
 
     def getInfo(self, feature: str, language: str | list[str] = "en"):
         """ Get information about a feature pack. Stuff like isActive or ShopCount """
-        return self.getInfoMultiple([feature], language)
+        return self.getInfoMultiple([feature], language)[0]
 
     def getInfoMultiple(self, features: list[str], language: str | list[str] = ["en"]):
         """ Get information about multiple feature packs. Note that it still requires the aliases """
@@ -65,4 +65,13 @@ class FeaturePackService:
         language_code = language_code_type([language] if isinstance(language, str) else language)
         feature = self.service2.getInfo(getinfo, attributenames, language_code)
         return feature
+
+    def applyToShop(self, feature: str, shop: str):
+        """ Apply a feature pack to a specific shop. """
+        input_type = self.client.get_type("ns1:TApplyToShop_Input")
+        feature_path = f"/Providers/{self.provider}/FeaturePacks/{feature}"
+        shop_path = f"/Providers/{self.provider}/ShopRefs/{shop}"
+        pair = input_type(feature_path, shop_path)
+        result = self.service2.applyToShop(pair)
+        return result
 
