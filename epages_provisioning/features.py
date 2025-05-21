@@ -46,11 +46,15 @@ class FeaturePackService:
     def _build_full_username(self):
         return f"/Providers/{self.provider}/Users/{self.username}"
 
-    def getInfo(self, feature):
+    def getInfo(self, feature: str, language: str | list[str] = "en"):
         """ Get information about a feature pack. Stuff like isActive or ShopCount """
+        return self.getInfoMultiple([feature], language)
+
+    def getInfoMultiple(self, features: list[str], language: str | list[str] = ["en"]):
+        """ Get information about multiple feature packs. Note that it still requires the aliases """
         getinfo_type = self.client.get_type("ns0:type_GetInfo_In")
-        path = f"/Providers/{self.provider}/FeaturePacks/{feature}"
-        getinfo = getinfo_type([path])
+        path = [f"/Providers/{self.provider}/FeaturePacks/{feature}" for feature in features]
+        getinfo = getinfo_type(path)
         attributenames_type = self.client.get_type("ns0:type_AttributeNames_In")
 
         # Can fetch more attributes, that ePages doesn't return by default.
@@ -58,7 +62,7 @@ class FeaturePackService:
         attributenames = attributenames_type(['Alias'])
 
         language_code_type = self.client.get_type("ns0:type_LanguageCodes_In")
-        language_code = language_code_type(['en'])
-        return self.service2.getInfo(getinfo, attributenames, language_code)
-        # Now it sends the request, but cannot parse the response...
+        language_code = language_code_type([language] if isinstance(language, str) else language)
+        feature = self.service2.getInfo(getinfo, attributenames, language_code)
+        return feature
 

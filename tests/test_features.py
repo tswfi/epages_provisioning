@@ -21,14 +21,13 @@ class TestFeaturePackService(unittest.TestCase):
         )
 
 
-        error = fps.getInfo('invalid'); # This returns an error, which is valid.
-        logger.debug(f"invalid feature response. feature pack not found: {error}")
-        assert error[0].Error.Message == 'Object with path /Providers/Distributor/FeaturePacks/invalid was not found.'
+        error = fps.getInfo('invalid');
+        logger.debug(f"feature pack not found error: {error}")
+        assert error.Error.Message == 'Object with path /Providers/Distributor/FeaturePacks/invalid was not found.'
 
-        # But if you fetch a valid feature pack, it returns the information in invalid form...
-        feature = fps.getInfo('demo') # so this needs to be fixes in ingress.
+        feature = fps.getInfo('demo')
 
         logger.debug(f"Feature: {feature}")
-        assert feature[0].Error == None
-        assert feature[0].IsActive == True
-        assert feature[0].Attributes[0].Value == 'demo'
+        assert feature.Error == None
+        assert feature.IsActive == True
+        assert feature.Attributes[0].Value == 'demo'

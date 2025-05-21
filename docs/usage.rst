@@ -179,9 +179,46 @@ Features
         username = "admin",
         password = "admin",
     )
-    feature_pack = feature_service.getInfo('RateCompass');
-    # TODO, IDK what this will actually even look like
 
+    ## first let's get a feature pack.
+    ## There is not method for fetching all, so you need to know the "Alias" of the feature pack.
+    feature_pack = feature_service.getInfo('RateCompass')
+    if(feature_pack.Error == None):
+         print(feature_pack.IsActive)
+         for attr in feature_pack.Attributes:
+             print(f"name {attr.Name} value is {attr.Value}") # for now it only has alias
+         print(feature_pack.ShopCount)
+         print(feature_pack.ActiveShopCount)
+
+
+    ## or fetch multiple features with one request. Still requires the aliases...
+    feature_packs = feature_service.getInfoMultiple(['RateCompass', 'BaseDesign'])
+
+
+    ## Language support
+    feature_service.getInfo('RateCompass', 'en')
+    feature_service.getInfo('RateCompass', ['en', 'de'])
+    feature_service.getInfoMultiple(['a', 'b'], 'en')
+    feature_service.getInfoMultiple(['a','b'], ['en', 'de'])
+
+    ## Next assign shop to the feature pack.
+    ## There is not method for checking if shop is already has the feature pack (at least I couldn't find it)
+    TODO...
+
+
+    ## And remove the feature pack from the shop
+    ## Again, there is no tmethod for checking if shop has feature pack or not...
+    TODO...
+
+    ## TODO, check if we can check induvidual features of the shop? Maybe in the ShopConfigService12 getInfo? IDK...
+
+    # error handling
     non_existing_feature_pack = feature_service.getInfo('does_not_exist');
-    if(on_existing_feature_pack[0].Error.Message):
-         # TODO, error handling... Maybe throw exception or just return undef. IDK.
+    if(non_existing_feature_pack.Error):
+         print(non_existing_feature_pack.Error.Message)
+         # In this case it's that it doesn't exists.
+
+
+
+* Make sure to check that the feature pack is active in general, before using it.
+* Make sure that the feature pack is active **for the specific shop type** before trying to activate it for a shop.
