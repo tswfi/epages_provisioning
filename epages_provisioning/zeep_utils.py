@@ -203,11 +203,48 @@ class ArrayFixer(Plugin):
         if feature_packs is not None:
             logger.debug("Mangling GetInfo path element, to arraytype")
             namespace = 'ns2' if operation.name == 'applyToShop' else 'ns3'
+            if operation.name == 'applyToShop':
+                namespace = 'ns2'
+
             length = len(feature_packs)
             feature_packs.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
             ] = f"{namespace}:string[{length}]"
             for item in feature_packs.getchildren():
                 item.attrib.clear()
+
+
+        # There is probably a better way to do this, but I couldn't find it.
+        # Wrap the feature pair in array/item elements. It requires the TApplyToShop_Input type, which only acceps strings...
+        if(operation.name == 'applyToShop' and feature_packs is not None):
+            logger.debug("Mangling FeaturePacks element, to arraytype")
+            # Create a new wrapper element array
+            array = etree.Element(
+                "{http://schemas.xmlsoap.org/soap/encoding/}Array",
+                nsmap={
+                    "soapenc": "http://schemas.xmlsoap.org/soap/encoding/",
+                    "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                    "xsd": "http://www.w3.org/2001/XMLSchema",
+                },
+            )
+            array.attrib[
+                "{http://www.w3.org/2001/XMLSchema-instance}type"
+            ] = "soapenc:Array"
+            array.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "xsd:anyType[1]"
+
+            # Create <item> and move FeaturePacks' children into it
+            item = etree.Element("item")
+            for child in list(feature_packs):
+                feature_packs.remove(child)
+                item.append(child)
+
+            array.append(item)
+
+            parent = feature_packs.getparent()
+            if parent:
+                parent.replace(feature_packs, array)
+
 
         return envelope, http_headers

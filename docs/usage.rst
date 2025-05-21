@@ -202,15 +202,16 @@ Features
     feature_service.getInfoMultiple(['a','b'], ['en', 'de'])
 
     ## Next assign shop to the feature pack.
-    ## There is not method for checking if shop is already has the feature pack (at least I couldn't find it)
-    TODO...
-
+    res = feature_service.applyToShop('RateCompass', 'DemoShop')
+    if(res.applied):
+        print('todo')
+    else:
+        print(res.Error.Message)
 
     ## And remove the feature pack from the shop
-    ## Again, there is no tmethod for checking if shop has feature pack or not...
-    TODO...
 
-    ## TODO, check if we can check induvidual features of the shop? Maybe in the ShopConfigService12 getInfo? IDK...
+
+    ## TODO: Check if there is a way of checking if shop already has a feature pack. Or what feature packs it has
 
     # error handling
     non_existing_feature_pack = feature_service.getInfo('does_not_exist');

@@ -21,5 +21,7 @@ class TestFeaturePackService(unittest.TestCase):
         )
 
 
-        applyShop = fps.applyToShop('demo', 'DemoShop2')
+        applyShop = fps.applyToShop('demo2', 'demo2')
         logger.debug(f"Apply to shop: {applyShop}")
+        invalid = fps.applyToShop('demo', 'invalid')
+        logger.debug(f"Apply to invalid shop: {invalid}")

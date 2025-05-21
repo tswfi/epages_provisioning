@@ -73,5 +73,4 @@ class FeaturePackService:
         shop_path = f"/Providers/{self.provider}/ShopRefs/{shop}"
         pair = input_type(feature_path, shop_path)
         result = self.service2.applyToShop(pair)
-        return result
-
+        return result[0]
