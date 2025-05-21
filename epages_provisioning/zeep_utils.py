@@ -23,7 +23,7 @@ class LocalSchemaTransport(Transport):
         """Load the content from the given URL"""
         if not url:
             raise ValueError("No url given to load")
-        logger.error(f"Loading {url}")
+        logger.debug(f"Loading {url}")
         scheme = urlparse(url).scheme
         if scheme in ("http", "https", "file"):
 
@@ -34,7 +34,7 @@ class LocalSchemaTransport(Transport):
 
             # fix feature namespaces
             if url.endswith("FeaturePackService.wsdl"):
-                logger.error(f"Patching WSDL {url}")
+                logger.debug(f"Patching WSDL {url}")
                 parser = etree.XMLParser(ns_clean=True, recover=True)
                 content = super().load(url)
                 doc = etree.fromstring(content, parser=parser)
@@ -47,7 +47,7 @@ class LocalSchemaTransport(Transport):
                 return etree.tostring(doc)
 
             elif url.endswith("FeaturePackTypes.xsd"):
-                logger.error(f"Patching XSD {url}")
+                logger.debug(f"Patching XSD {url}")
                 parser = etree.XMLParser(ns_clean=True, recover=True)
                 content = super().load(url)
                 doc = etree.fromstring(content, parser=parser)
@@ -205,7 +205,8 @@ class ArrayFixer(Plugin):
             namespace = 'ns2' if operation.name == 'applyToShop' else 'ns3'
             if operation.name == 'applyToShop':
                 namespace = 'ns2'
-
+            if operation.name == 'removeFromShop':
+                namespace = 'ns2'
             length = len(feature_packs)
             feature_packs.attrib[
                 "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
@@ -216,7 +217,7 @@ class ArrayFixer(Plugin):
 
         # There is probably a better way to do this, but I couldn't find it.
         # Wrap the feature pair in array/item elements. It requires the TApplyToShop_Input type, which only acceps strings...
-        if(operation.name == 'applyToShop' and feature_packs is not None):
+        if((operation.name == 'applyToShop' or operation.name == 'removeFromShop') and feature_packs is not None):
             logger.debug("Mangling FeaturePacks element, to arraytype")
             # Create a new wrapper element array
             array = etree.Element(
@@ -243,7 +244,7 @@ class ArrayFixer(Plugin):
             array.append(item)
 
             parent = feature_packs.getparent()
-            if parent:
+            if parent is not None:
                 parent.replace(feature_packs, array)
 
 

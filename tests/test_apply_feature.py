@@ -23,5 +23,18 @@ class TestFeaturePackService(unittest.TestCase):
 
         applyShop = fps.applyToShop('demo2', 'demo2')
         logger.debug(f"Apply to shop: {applyShop}")
+        # this might fail, because the feature is already assigned
+
+        removeShop = fps.removeFromShop('demo2', 'demo2')
+        logger.debug(f"Remove from shop: {removeShop}")
+        assert removeShop.Error == None
+        assert removeShop.removed == True
+
+        applyShop = fps.applyToShop('demo2', 'demo2')
+        logger.debug(f"Apply to shop: {applyShop}")
+        assert applyShop.Error == None
+        assert applyShop.applied == True
+
         invalid = fps.applyToShop('demo', 'invalid')
         logger.debug(f"Apply to invalid shop: {invalid}")
+        assert invalid.Error.Message == 'Object with path /Providers/Distributor/ShopRefs/invalid was not found.'

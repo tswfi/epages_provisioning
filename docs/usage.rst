@@ -204,12 +204,16 @@ Features
     ## Next assign shop to the feature pack.
     res = feature_service.applyToShop('RateCompass', 'DemoShop')
     if(res.applied):
-        print('todo')
+        print('OK')
     else:
         print(res.Error.Message)
 
     ## And remove the feature pack from the shop
-
+    res = feature_service.removeFromShop('RateCompass', 'DemoShop');
+    if(res.removed):
+        print('OK')
+    else:
+        print(res.Error.Message)
 
     ## TODO: Check if there is a way of checking if shop already has a feature pack. Or what feature packs it has
 

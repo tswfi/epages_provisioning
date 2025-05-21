@@ -74,3 +74,12 @@ class FeaturePackService:
         pair = input_type(feature_path, shop_path)
         result = self.service2.applyToShop(pair)
         return result[0]
+
+    def removeFromShop(self, feature: str, shop: str):
+        """ Remove a feature pack from a specific shop. """
+        input_type = self.client.get_type("ns1:TRemoveFromShop_Input")
+        feature_path = f"/Providers/{self.provider}/FeaturePacks/{feature}"
+        shop_path = f"/Providers/{self.provider}/ShopRefs/{shop}"
+        pair = input_type(feature_path, shop_path)
+        result = self.service2.removeFromShop(pair)
+        return result[0]
