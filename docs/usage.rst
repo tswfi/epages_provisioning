@@ -48,6 +48,28 @@ Create new shop
     # or set a attribute
     shop.set_shop_attribute('GrantServiceAccessUntil', '2100-01-01')
 
+
+Get shop attribute
+~~~~~~~~~~~~~~~~~~
+
+Pretty much the same as above, but instead use an alias of an existing shop
+
+.. code-block:: python
+    from epages_provisioning.provisioning import ShopConfigService
+    from epages_provisioning.shop import Shop
+    sc = ShopConfigService(
+        server = "example.com",
+        provider = "Distributor",
+        username = "admin",
+        password = "admin",
+    )
+
+    # this wont create the shop yet
+    shop = Shop('ExsitingShopAlias', sc)
+    shop.get_shop_attribute('GBaseActiveFeatureList') # This is not implemented yet
+
+
+
 Mark the shop for deletion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -224,12 +246,15 @@ Features
          print(non_existing_feature_pack.Error.Message)
          # In this case it's that it doesn't exists.
 
+
+
+To check if feature pack is already active for the shop, check the new shop attribute GBaseActiveFeatureList
+
+
 * Make sure to check that the feature pack is active in general, before using it.
 * Make sure that the feature pack is active **for the specific shop type** before trying to activate it for a shop.
 * You can't check if the shop is eligible for the feature. You just need to assign it and see if it complains about it (TODO)
 
 
 * TOOD: Check if there is a way of checking if shop is eligible for a specific feature pack, before doing an assign.
-* TODO: Check if there is a way of checking if shop already has a specific feature pack.
-* TODO: check if there is a way of getting list of feature packs assigned to a shop.
 * TODO: Check if there is a way of getting list of **all** feature packs.
