@@ -48,6 +48,28 @@ Create new shop
     # or set a attribute
     shop.set_shop_attribute('GrantServiceAccessUntil', '2100-01-01')
 
+
+Get shop attribute
+~~~~~~~~~~~~~~~~~~
+
+Pretty much the same as above, but instead use an alias of an existing shop
+
+.. code-block:: python
+    from epages_provisioning.provisioning import ShopConfigService
+    from epages_provisioning.shop import Shop
+    sc = ShopConfigService(
+        server = "example.com",
+        provider = "Distributor",
+        username = "admin",
+        password = "admin",
+    )
+
+    # this wont create the shop yet
+    shop = Shop('ExsitingShopAlias', sc)
+    shop.get_shop_attribute('GBaseActiveFeatureList') # This is not implemented yet
+
+
+
 Mark the shop for deletion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -165,3 +187,74 @@ Create new shop
         }
     )
     sc.create(shop)
+
+
+Features
+~~~~~~~~
+
+.. code-block:: python
+
+    from epages_provisioning import features
+    feature_service = features.FeaturePackService(
+        server = "example.com", # for testing, you can force http, but by default it addres https://
+        provider = "Distributor",
+        username = "admin",
+        password = "admin",
+    )
+
+    ## first let's get a feature pack.
+    ## There is not method for fetching all, so you need to know the "Alias" of the feature pack.
+    feature_pack = feature_service.getInfo('RateCompass')
+    if(feature_pack.Error == None):
+         print(feature_pack.IsActive)
+         for attr in feature_pack.Attributes:
+             print(f"name {attr.Name} value is {attr.Value}") # for now it only has alias
+         print(feature_pack.ShopCount) # This increases on every assign, and doesn't subtract removes
+         print(feature_pack.ActiveShopCount) # This it what you probably actually want
+
+
+    ## or fetch multiple features with one request. Still requires the aliases...
+    feature_packs = feature_service.getInfoMultiple(['RateCompass', 'BaseDesign', 'invalid'])
+    # Note that you can use this to check which feature_packs are available. Even though
+    # one parameter is invalid, it returns 3 items, one with an error and IsActive false
+
+
+    ## Language support. by default en/de are supported, but not fi
+    feature_service.getInfo('RateCompass', 'en')
+    feature_service.getInfo('RateCompass', ['en', 'de'])
+    feature_service.getInfoMultiple(['a', 'b'], 'en')
+    feature_service.getInfoMultiple(['a','b'], ['en', 'de'])
+
+    ## Next assign shop to the feature pack.
+    res = feature_service.applyToShop('RateCompass', 'DemoShop')
+    if(res.applied):
+        print('OK')
+    else:
+        print(res.Error.Message)
+
+    ## And remove the feature pack from the shop
+    res = feature_service.removeFromShop('RateCompass', 'DemoShop');
+    if(res.removed):
+        print('OK')
+    else:
+        print(res.Error.Message)
+
+    # error handling
+    # Response should always be same, errors are displayed in `Error.Message`. So if `Error` is undef, it should be fine.
+    non_existing_feature_pack = feature_service.getInfo('does_not_exist');
+    if(non_existing_feature_pack.Error):
+         print(non_existing_feature_pack.Error.Message)
+         # In this case it's that it doesn't exists.
+
+
+
+To check if feature pack is already active for the shop, check the new shop attribute GBaseActiveFeatureList
+
+
+* Make sure to check that the feature pack is active in general, before using it.
+* Make sure that the feature pack is active **for the specific shop type** before trying to activate it for a shop.
+* You can't check if the shop is eligible for the feature. You just need to assign it and see if it complains about it (TODO)
+
+
+* TOOD: Check if there is a way of checking if shop is eligible for a specific feature pack, before doing an assign.
+* TODO: Check if there is a way of getting list of **all** feature packs.

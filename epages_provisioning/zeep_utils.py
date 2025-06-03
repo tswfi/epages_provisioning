@@ -1,6 +1,7 @@
 import logging
 import os
 from urllib.parse import urlparse
+from lxml import etree
 
 from zeep import Plugin
 from zeep.transports import Transport
@@ -22,7 +23,7 @@ class LocalSchemaTransport(Transport):
         """Load the content from the given URL"""
         if not url:
             raise ValueError("No url given to load")
-
+        logger.debug(f"Loading {url}")
         scheme = urlparse(url).scheme
         if scheme in ("http", "https", "file"):
 
@@ -30,6 +31,32 @@ class LocalSchemaTransport(Transport):
                 response = self.cache.get(url)
                 if response:
                     return bytes(response)
+
+            # fix feature namespaces
+            if url.endswith("FeaturePackService.wsdl"):
+                logger.debug(f"Patching WSDL {url}")
+                parser = etree.XMLParser(ns_clean=True, recover=True)
+                content = super().load(url)
+                doc = etree.fromstring(content, parser=parser)
+
+                # Fix the import namespace in WSDL to match the XSD targetNamespace exactly
+                for imp in doc.xpath("//xsd:import", namespaces={'xsd': 'http://www.w3.org/2001/XMLSchema'}):
+                    imp.attrib['namespace'] = "urn://epages.de/WebService/FeaturePackTypes/2005/03"
+
+
+                return etree.tostring(doc)
+
+            elif url.endswith("FeaturePackTypes.xsd"):
+                logger.debug(f"Patching XSD {url}")
+                parser = etree.XMLParser(ns_clean=True, recover=True)
+                content = super().load(url)
+                doc = etree.fromstring(content, parser=parser)
+
+                expected_ns = "urn://epages.de/WebService/FeaturePackTypes/2005/03"
+                current_ns = doc.attrib.get('targetNamespace', '')
+                if current_ns != expected_ns:
+                    doc.attrib['targetNamespace'] = expected_ns
+                return etree.tostring(doc)
 
             # this url was causing some issues (404 errors); it is now saved locally for fast retrieval when needed
             if url == 'http://schemas.xmlsoap.org/soap/encoding/':
@@ -151,5 +178,74 @@ class ArrayFixer(Plugin):
             ] = "ns2:string[{}]".format(length)
             for item in languages.getchildren():
                 item.attrib.clear()
+
+        language_codes = envelope.find(".//LanguageCodes")
+        if language_codes is not None:
+            logger.debug("Mangling Language codes element, to arraytype")
+            length = len(language_codes)
+            language_codes.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns2:string[{}]".format(length)
+            for item in language_codes.getchildren():
+                item.attrib.clear()
+
+        attribute_names = envelope.find(".//AttributeNames")
+        if attribute_names is not None:
+            logger.debug("Mangling AttributeNames element, to arraytype")
+            length = len(attribute_names)
+            attribute_names.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "ns2:string[{}]".format(length)
+            for item in attribute_names.getchildren():
+                item.attrib.clear()
+
+        feature_packs = envelope.find(".//FeaturePacks")
+        if feature_packs is not None:
+            logger.debug("Mangling GetInfo path element, to arraytype")
+            namespace = 'ns2' if operation.name == 'applyToShop' else 'ns3'
+            if operation.name == 'applyToShop':
+                namespace = 'ns2'
+            if operation.name == 'removeFromShop':
+                namespace = 'ns2'
+            length = len(feature_packs)
+            feature_packs.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = f"{namespace}:string[{length}]"
+            for item in feature_packs.getchildren():
+                item.attrib.clear()
+
+
+        # There is probably a better way to do this, but I couldn't find it.
+        # Wrap the feature pair in array/item elements. It requires the TApplyToShop_Input type, which only acceps strings...
+        if((operation.name == 'applyToShop' or operation.name == 'removeFromShop') and feature_packs is not None):
+            logger.debug("Mangling FeaturePacks element, to arraytype")
+            # Create a new wrapper element array
+            array = etree.Element(
+                "{http://schemas.xmlsoap.org/soap/encoding/}Array",
+                nsmap={
+                    "soapenc": "http://schemas.xmlsoap.org/soap/encoding/",
+                    "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                    "xsd": "http://www.w3.org/2001/XMLSchema",
+                },
+            )
+            array.attrib[
+                "{http://www.w3.org/2001/XMLSchema-instance}type"
+            ] = "soapenc:Array"
+            array.attrib[
+                "{http://schemas.xmlsoap.org/soap/encoding/}arrayType"
+            ] = "xsd:anyType[1]"
+
+            # Create <item> and move FeaturePacks' children into it
+            item = etree.Element("item")
+            for child in list(feature_packs):
+                feature_packs.remove(child)
+                item.append(child)
+
+            array.append(item)
+
+            parent = feature_packs.getparent()
+            if parent is not None:
+                parent.replace(feature_packs, array)
+
 
         return envelope, http_headers
