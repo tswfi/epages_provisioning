@@ -2,6 +2,10 @@
 History
 =======
 
+1.1.4 (2025-06-04)
+------------------
+* manual fix for release cycle
+
 1.1.3 (2025-06-04)
 ------------------
 * add feature pack services
