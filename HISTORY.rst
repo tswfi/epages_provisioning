@@ -2,6 +2,11 @@
 History
 =======
 
+1.1.3 (2025-06-04)
+------------------
+* add feature pack services
+* update zeep to 4.3.1
+
 1.1.2 (2024-04-30)
 ------------------
 * add the xml file to release..
